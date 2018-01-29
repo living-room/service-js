@@ -1,17 +1,17 @@
 {
-  "name": "room-http",
-  "version": "0.1.0",
+  "name": "room-server",
+  "version": "0.2.0",
   "main": "server.js",
   "repository": "git@github.com:jedahan/room-http.git",
   "author": "Jonathan Dahan <hi@jonathan.is>",
   "license": "MIT",
   "dependencies": {
-    "koa": "^2.4.1",
-    "koa-body": "^2.5.0",
-    "koa-cors": "^0.0.16",
-    "koa-route": "^3.2.0",
+    "@koa/cors": "2",
+    "koa": "2",
+    "koa-body": "2",
+    "koa-route": "3",
+    "koa-socket": "^4.4.0",
     "koa-static": "^4.0.2",
-    "koa-websocket": "^4.1.0",
     "roomdb": "alexwarth/roomdb#modularify"
   }
 }
