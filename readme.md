@@ -6,6 +6,8 @@ You can test it out by running `node server` after installing the dependencies w
 
 For motivations, context, and philosophy, check out https://github.com/jedahan/research
 
+For a nicer javascript client, check out https://github.com/jedahan/room-client
+
 ## example http
 
     $ curl -d '{"fact": "#curl is an app at (20, 30)"}' -H "Content-Type: application/json" localhost:3000/assert
