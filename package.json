@@ -12,6 +12,7 @@
     "koa-route": "3",
     "koa-socket": "^4.4.0",
     "koa-static": "^4.0.2",
+    "minimist": "^1.2.0",
     "roomdb": "alexwarth/roomdb#modularify"
   }
 }
