@@ -5,6 +5,10 @@
   "repository": "git@github.com:jedahan/room-http.git",
   "author": "Jonathan Dahan <hi@jonathan.is>",
   "license": "MIT",
+  "scripts": {
+    "lint": "eslint ./lib",
+    "lint-fix": "eslint ./lib --fix"
+  },
   "dependencies": {
     "@koa/cors": "2",
     "koa": "2",
@@ -14,5 +18,13 @@
     "koa-static": "^4.0.2",
     "minimist": "^1.2.0",
     "roomdb": "alexwarth/roomdb#modularify"
+  },
+  "devDependencies": {
+    "eslint": "^4.16.0",
+    "eslint-config-standard": "^11.0.0-beta.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-standard": "^3.0.1"
   }
 }
