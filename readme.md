@@ -8,6 +8,10 @@ For motivations, context, and philosophy, check out https://github.com/jedahan/r
 
 For a nicer javascript client, check out https://github.com/jedahan/room-client
 
+## installing
+
+If you have systemd, you can generate and install a service file with `yarn systemd`
+
 ## example http
 
     $ curl -d '{"fact": "#curl is an app at (20, 30)"}' -H "Content-Type: application/json" localhost:3000/assert
