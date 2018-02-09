@@ -7,6 +7,7 @@ function add() {
     name: pkg.name,
     cwd: '.',
     app: path.resolve(`./${pkg.main}`),
+    user: 'room',
     engine: 'node',
     pid: `/var/run/${pkg.name}.pid`,
     log: `/var/log/${pkg.name}/log`,
@@ -22,7 +23,7 @@ function add() {
 
 function remove() {
   service
-    .remove({name: pkg.name})
+    .remove(pkg.name)
     .then(() => console.log(`${pkg.name} service removed`))
     .catch(err => console.error(`error removing ${pkg.name}`, err.toString()))
 }
@@ -30,6 +31,6 @@ function remove() {
 switch (process.argv[2]) {
   case 'add': add(); break;
   case 'remove': remove(); break;
-  default: remove(): add(); break;
+  default: remove(); add()
 }
 
