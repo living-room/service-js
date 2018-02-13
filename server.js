@@ -3,8 +3,8 @@ const PORT = process.env.PORT || 3000
 const RoomDB = require('roomdb')
 const room = new RoomDB()
 
-let app = require('./lib/httpServer.js')(room)
-    app = require('./lib/socketServer.js')(room, app)
+let app = require('./lib/httpServer.js')(room.client('http'))
+    app = require('./lib/socketServer.js')(app)(room.client('socket'))
 
 app.listen(PORT)
 

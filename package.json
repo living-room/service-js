@@ -1,14 +1,23 @@
 {
   "name": "room-server",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "main": "server.js",
   "repository": "git@github.com:jedahan/room-http.git",
-  "author": "Jonathan Dahan <hi@jonathan.is>",
+  "author": "Jonathan Dahan <hi@jonathan.is> (http://jedahan.com)",
+  "contributors": [
+    "Alex Warth <alexwarth@gmail.com> (http://alexwarth.com)",
+    "Ana Malagon <atmalagon@gmail.com> (https://github.com/atmalagon)",
+    "Justin Falcone <justin@justinfalcone.com> (http://justinfalcone.com/)"
+  ],
   "license": "MIT",
   "scripts": {
     "lint": "eslint ./lib",
-    "lint-fix": "eslint ./lib --fix"
+    "lint-fix": "eslint ./lib --fix",
+    "systemd": "yarn run systemd:remove; yarn run systemd:add",
+    "systemd:add": "NODE=`which node` sudo -E bash -c '$NODE service.js add'",
+    "systemd:remove": "NODE=`which node` sudo -E bash -c '$NODE service.js remove'"
   },
+  "keywords": ["room", "roomdb", "server" ],
   "dependencies": {
     "@koa/cors": "2",
     "koa": "2",
@@ -17,7 +26,6 @@
     "koa-socket": "^4.4.0",
     "koa-static": "^4.0.2",
     "minimist": "^1.2.0",
-    "roomdb": "alexwarth/roomdb#modularify"
   },
   "devDependencies": {
     "eslint": "^4.16.0",
@@ -26,5 +34,9 @@
     "eslint-plugin-node": "^5.2.1",
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-standard": "^3.0.1"
+    "roomdb": "alexwarth/roomdb#build-roomdb-module"
+  },
+  "optionalDependencies": {
+    "service-systemd": "^3.3.0"
   }
 }
