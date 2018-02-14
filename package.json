@@ -12,7 +12,7 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint ./lib",
-    "lint-fix": "eslint ./lib --fix",
+    "lint:fix": "eslint ./lib --fix",
     "systemd": "yarn run systemd:remove; yarn run systemd:add",
     "systemd:add": "NODE=`which node` sudo -E bash -c '$NODE service.js add'",
     "systemd:remove": "NODE=`which node` sudo -E bash -c '$NODE service.js remove'"
@@ -33,7 +33,7 @@
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-node": "^5.2.1",
     "eslint-plugin-promise": "^3.6.0",
-    "eslint-plugin-standard": "^3.0.1"
+    "eslint-plugin-standard": "^3.0.1",
     "roomdb": "alexwarth/roomdb#build-roomdb-module"
   },
   "optionalDependencies": {
