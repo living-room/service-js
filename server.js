@@ -4,7 +4,7 @@ const RoomDB = require('roomdb')
 const room = new RoomDB()
 
 let app = require('./lib/httpServer.js')(room.client('http'))
-    app = require('./lib/socketServer.js')(app)(room.client('socket'))
+app = require('./lib/socketServer.js')(app)(room.client('socket'))
 
 app.listen(PORT)
 

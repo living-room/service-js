@@ -11,13 +11,18 @@
   ],
   "license": "MIT",
   "scripts": {
-    "lint": "eslint ./lib",
-    "lint:fix": "eslint ./lib --fix",
+    "lint": "standard",
+    "lint:fix": "standard --fix",
     "systemd": "yarn run systemd:remove; yarn run systemd:add",
     "systemd:add": "NODE=`which node` sudo -E bash -c '$NODE service.js add'",
-    "systemd:remove": "NODE=`which node` sudo -E bash -c '$NODE service.js remove'"
+    "systemd:remove": "NODE=`which node` sudo -E bash -c '$NODE service.js remove'",
+    "prepublish": "npm-run-all lint"
   },
-  "keywords": ["room", "roomdb", "server" ],
+  "keywords": [
+    "room",
+    "roomdb",
+    "server"
+  ],
   "dependencies": {
     "@koa/cors": "2",
     "koa": "2",
@@ -25,16 +30,12 @@
     "koa-route": "3",
     "koa-socket": "^4.4.0",
     "koa-static": "^4.0.2",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.0"
   },
   "devDependencies": {
-    "eslint": "^4.16.0",
-    "eslint-config-standard": "^11.0.0-beta.0",
-    "eslint-plugin-import": "^2.8.0",
-    "eslint-plugin-node": "^5.2.1",
-    "eslint-plugin-promise": "^3.6.0",
-    "eslint-plugin-standard": "^3.0.1",
-    "roomdb": "alexwarth/roomdb#build-roomdb-module"
+    "npm-run-all": "^4.1.2",
+    "roomdb": "alexwarth/roomdb#build-roomdb-module",
+    "standard": "^10.0.3"
   },
   "optionalDependencies": {
     "service-systemd": "^3.3.0"

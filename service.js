@@ -2,7 +2,7 @@ const service = require('service-systemd')
 const pkg = require('./package.json')
 const path = require('path')
 
-function add() {
+function add () {
   service.add({
     name: pkg.name,
     cwd: '.',
@@ -12,16 +12,16 @@ function add() {
     pid: `/var/run/${pkg.name}.pid`,
     log: `/var/log/${pkg.name}/log`,
     error: `/var/log/${pkg.name}/error`,
-    "engine.bin": process.env.NODE,
+    'engine.bin': process.env.NODE,
     env: {
-      NODE_ENV: 'production',
+      NODE_ENV: 'production'
     }
   })
   .then(() => console.log(`${pkg.name} service removed`))
   .catch(err => console.error(`error removing ${pkg.name}`, err.toString()))
 }
 
-function remove() {
+function remove () {
   service
     .remove(pkg.name)
     .then(() => console.log(`${pkg.name} service removed`))
@@ -29,8 +29,7 @@ function remove() {
 }
 
 switch (process.argv[2]) {
-  case 'add': add(); break;
-  case 'remove': remove(); break;
+  case 'add': add(); break
+  case 'remove': remove(); break
   default: remove(); add()
 }
-
