@@ -33,6 +33,7 @@
     "minimist": "^1.2.0"
   },
   "devDependencies": {
+    "ava": "^0.25.0",
     "npm-run-all": "^4.1.2",
     "roomdb": "alexwarth/roomdb#build-roomdb-module",
     "standard": "^10.0.3"
