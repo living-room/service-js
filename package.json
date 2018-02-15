@@ -13,10 +13,11 @@
   "scripts": {
     "lint": "standard",
     "lint:fix": "standard --fix",
+    "prepublish": "npm-run-all lint",
     "systemd": "yarn run systemd:remove; yarn run systemd:add",
     "systemd:add": "NODE=`which node` sudo -E bash -c '$NODE service.js add'",
     "systemd:remove": "NODE=`which node` sudo -E bash -c '$NODE service.js remove'",
-    "prepublish": "npm-run-all lint"
+    "test": "ava"
   },
   "keywords": [
     "room",
