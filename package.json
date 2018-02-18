@@ -11,6 +11,7 @@
   ],
   "license": "MIT",
   "scripts": {
+    "examples": "serve examples/",
     "lint": "standard",
     "lint:fix": "standard --fix",
     "prepublish": "npm-run-all lint",
@@ -37,6 +38,7 @@
     "ava": "^0.25.0",
     "npm-run-all": "^4.1.2",
     "roomdb": "alexwarth/roomdb#build-roomdb-module",
+    "serve": "^6.4.10",
     "standard": "^10.0.3",
     "supertest": "^3.0.0"
   },
