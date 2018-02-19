@@ -1,16 +1,54 @@
-<script src=http://localhost:3000/socket.io/socket.io.js ></script>
-<script>
-  const socket = io.connect(`http://localhost:3000`)
-  socket.on('assert', assertion => console.log(`someone asserted ${assertion}`))
-  socket.on('retract', retraction => console.log(`someone retracted ${retraction}`))
+<head>
+  <style>
+    canvas { background-color: rgba(58, 67, 84, 0.7) }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <script src=http://localhost:3000/socket.io/socket.io.js ></script>
+  <script>
+    let labels = new Map()
+    context = canvas.getContext('2d')
+    const socket = io.connect(`http://localhost:3000`)
 
-  socket.on('subscriptionFacts', ({queries, solutions}) => {
-    socket.emit('retract', ['i am a browser'])
-    console.log(`what am i?`, solutions)
-  })
+    socket.on('subscriptionFacts', ({queries, solutions}) => {
+      solutions.forEach( solution => {
+        let [label, x, y] = [solution.id.id, solution.x.value, solution.y.value]
+        labels.set(label, {x, y})
+        const retraction = `#${label} is a label at (${x}, ${y})`
+        socket.emit('retract', [ retraction ])
+      })
+    })
 
-  socket.on('connection', data => {
-    socket.emit('updateSubscription', `i am a $what`)
-    socket.emit('assert', ['i am a browser'])
-  })
-</script>
+    socket.on('connection', data => {
+      socket.emit('updateSubscription', `$id is a label at ($x, $y)`)
+      socket.emit('assert', ['#fake is a label at (0.5, 0.5)'])
+    })
+
+    let fps = 30
+    let now
+    let then = Date.now()
+    let interval = 1000/fps
+    let delta
+
+    async function draw (time) {
+      requestAnimationFrame(draw)
+
+      now = Date.now()
+      delta = now - then
+
+      if (delta > interval) {
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
+        context.clearRect(0, 0, canvas.width, canvas.height)
+
+        for (label of labels.keys()) {
+          const { x, y } = labels.get(label)
+          context.fillText(label, x * canvas.width, y * canvas.height)
+        }
+      }
+    }
+
+    draw()
+  </script>
+</body>

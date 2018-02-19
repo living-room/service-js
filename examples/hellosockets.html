@@ -1,0 +1,16 @@
+<script src=http://localhost:3000/socket.io/socket.io.js ></script>
+<script>
+  const socket = io.connect(`http://localhost:3000`)
+  socket.on('assert', assertion => console.log(`someone asserted ${assertion}`))
+  socket.on('retract', retraction => console.log(`someone retracted ${retraction}`))
+
+  socket.on('subscriptionFacts', ({queries, solutions}) => {
+    socket.emit('retract', ['i am a browser'])
+    console.log(`what am i?`, solutions)
+  })
+
+  socket.on('connection', data => {
+    socket.emit('updateSubscription', `i am a $what`)
+    socket.emit('assert', ['i am a browser'])
+  })
+</script>
