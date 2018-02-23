@@ -12,12 +12,8 @@
     context = canvas.getContext('2d')
     const socket = io.connect(`http://localhost:3000`)
 
-    let lastTime = Date.now()
-
     socket.on('subscriptionFacts', ({queries, solutions}) => {
-      let currentTime = Date.now()
-      console.log('since last fact', currentTime - lastTime)
-      lastTime = currentTime
+      performance.mark('subscriptionFacts')
       solutions.forEach( solution => {
         let [label, x, y] = [solution.id.id, solution.x.value, solution.y.value]
         labels.set(label, {x, y})
