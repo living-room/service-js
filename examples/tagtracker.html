@@ -10,6 +10,10 @@
   <script>
     let labels = new Map()
     context = canvas.getContext('2d')
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+    context.font="40px sans-serif"
+
     const socket = io.connect(`http://localhost:3000`)
 
     socket.on('subscriptionFacts', ({queries, solutions}) => {
@@ -40,8 +44,6 @@
       delta = now - then
 
       if (delta > interval) {
-        canvas.width = window.innerWidth
-        canvas.height = window.innerHeight
         context.clearRect(0, 0, canvas.width, canvas.height)
 
         for (label of labels.keys()) {
