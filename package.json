@@ -1,8 +1,8 @@
 {
-  "name": "room-server",
-  "version": "0.2.1",
+  "name": "living-room-server",
+  "version": "0.2.2",
   "main": "server.js",
-  "repository": "git@github.com:jedahan/room-http.git",
+  "repository": "git@github.com:jedahan/living-room-server.git",
   "author": "Jonathan Dahan <hi@jonathan.is> (http://jedahan.com)",
   "contributors": [
     "Alex Warth <alexwarth@gmail.com> (http://alexwarth.com)",
@@ -38,7 +38,7 @@
   "devDependencies": {
     "ava": "^0.25.0",
     "npm-run-all": "^4.1.2",
-    "roomdb": "alexwarth/roomdb#build-roomdb-module",
+    "roomdb": "jedahan/living-room-database",
     "serve": "^6.4.10",
     "standard": "^10.0.3",
     "supertest": "^3.0.0"
