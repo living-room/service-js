@@ -1,7 +1,7 @@
 const PORT = process.env.PORT || 3000
 
-const RoomDB = require('roomdb')
-const room = new RoomDB()
+const Database = require('living-room-database')
+const room = new Database()
 
 let app = require('./lib/httpServer.js')(room.client('http'))
 app = require('./lib/socketServer.js')(app)(room.client('socket'))

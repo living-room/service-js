@@ -1,6 +1,6 @@
 {
   "name": "living-room-server",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "main": "server.js",
   "repository": "git@github.com:jedahan/living-room-server.git",
   "author": "Jonathan Dahan <hi@jonathan.is> (http://jedahan.com)",
@@ -38,7 +38,7 @@
   "devDependencies": {
     "ava": "^0.25.0",
     "npm-run-all": "^4.1.2",
-    "roomdb": "jedahan/living-room-database",
+    "living-room-database": "jedahan/living-room-database",
     "serve": "^6.4.10",
     "standard": "^10.0.3",
     "supertest": "^3.0.0"

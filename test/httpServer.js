@@ -1,12 +1,12 @@
 const test = require('ava')
-const RoomDB = require('roomdb')
+const Database = require('living-room-database')
 const request = require('supertest')
 const httpServer = require('../lib/httpServer.js')
 
 const gorogInitial = `#gorog is a barbarian at 40, 50`
 const gorogMoves = `#gorog is a barbarian at 99, 11`
 
-const createApp = () => httpServer((new RoomDB().client('http'))).listen()
+const createApp = () => httpServer((new Database().client('http'))).listen()
 
 test('assert adds to the log', async t => {
   const app = createApp()
