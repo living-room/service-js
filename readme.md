@@ -2,7 +2,7 @@
 
 Creates a room database that you can connect to over HTTP, socket.io, and osc!
 
-You can test it out by running `node server` after installing the dependencies with `yarn` or `npm install`
+You can test it out by running `node server` after installing the dependencies with `npm install`
 
 For motivations, context, and philosophy, check out https://github.com/jedahan/research
 
@@ -10,7 +10,7 @@ For a nicer javascript client, check out https://github.com/jedahan/room-client
 
 ## installing
 
-If you have systemd, you can generate and install a service file with `yarn systemd`
+If you have systemd, you can generate and install a service file with `npm run systemd`
 
 We also have a git [post-receive hook](./hooks/post-receive) which we setup like so:
 
@@ -85,11 +85,11 @@ void draw() {
 
 void mousePressed() {
   OscMessage assertMessage = new OscMessage("/assert");
-  assertMessage.add("#processing is a program at (0.2, 0.3)");
+  assertMessage.add("processing is a program at (0.2, 0.3)");
   oscP5.send(assertMessage, myRemoteLocation);
 
   OscMessage assert2Message = new OscMessage("/assert");
-  assert2Message.add("#coolprocessing is a notherprogram at (0.4, 0.4)");
+  assert2Message.add("coolprocessing is a notherprogram at (0.4, 0.4)");
   oscP5.send(assert2Message, myRemoteLocation);
 
   OscMessage selectMessage = new OscMessage("/select");
