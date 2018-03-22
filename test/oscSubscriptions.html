@@ -1,0 +1,71 @@
+<script src=http://localhost:3000/socket.io/socket.io.js ></script>
+<script>
+  const socket = io.connect(`http://localhost:3000`)
+  const initialselection = '$name is at $x, $y'
+  const gorogstart = 'gorog is at 0.5, 0.7'
+  const gorogmove = 'gorog is at 0.9, 0.7'
+  let number_of_assertions = 0
+  let number_of_retractions = 0
+  const gorogstartparsed = {name: {word: "gorog"}, x: {value: 0.5}, y:{value: 0.7}}
+  const gorogmoveparsed = {name: {word: "gorog"}, x: {value: 0.9}, y:{value: 0.7}}
+
+  const assertEq = (obj1, obj2, why) => {
+    let equals = obj1 === obj2
+    if (Array.isArray(obj1) && Array.isArray(obj2)) {
+      equals = (obj1.length == obj2.length) &&
+        obj1.every((el, idx) => JSON.stringify(el) == JSON.stringify(obj2[idx]))
+    }
+    console.assert(equals, why, obj1, obj2)
+  }
+
+  socket.on('subscribed', ({select, solutions}) => {
+    assertEq(select, initialselection, "subscribed:select")
+    assertEq(solutions, [], "subscribed:solutions")
+  })
+
+  socket.emit('subscribe', initialselection)
+  
+  socket.on('asserted', facts => {
+    number_of_assertions++
+    if (number_of_assertions == 1) {
+      assertEq([gorogstart], facts, "asserted:gorogstart")
+    } else if (number_of_assertions == 2) {
+      assertEq([gorogmove], facts, "asserted:gorogmove")
+    }
+  })
+
+  socket.on('retracted', facts => {
+    number_of_retractions++
+    if (number_of_retractions == 1) {
+      assertEq([gorogstart], facts, "retracted:gorogstart")
+    }
+  })
+
+  socket.on('assertions', ({assertions, selection}) => {
+    assertEq(selection, initialselection)
+    if (number_of_assertions === 1) {
+      assertEq(assertions, [gorogmoveparsed], "assertions:start")
+    }
+  })
+
+   socket.on('retractions', ({retractions, selection}) => {
+    
+    assertEq(selection, initialselection)
+    if (number_of_retractions === 1) {
+      assertEq(retractions, [], "retractions:initial")
+    } else if (number_of_retractions === 2) {
+      assertEq(retractions, [gorogstartparsed], "retractions:parsed")
+    }
+  })
+
+  setTimeout(() => {
+    socket.emit('assert', [gorogstart])
+  }, 10)
+  setTimeout(() => {
+    socket.emit('assert', [gorogmove])
+  }, 200)
+  setTimeout(() => {
+    socket.emit('retract', [gorogstart])
+  }, 300)
+
+</script>

@@ -11,6 +11,7 @@
   ],
   "license": "MIT",
   "scripts": {
+    "start": "node server",
     "examples": "serve examples/",
     "lint": "standard",
     "lint:fix": "standard --fix",
