@@ -19,8 +19,8 @@
   }
 
   socket.on('subscribed', ({selections, assertions}) => {
-    assertEq(selections, initialselections, "subscribed:selections")
-    assertEq(assertions, [], "subscribed:assertions")
+    assertEq([selections], initialselections, "subscribed:selections")
+    assertEq(assertions, undefined, "subscribed:assertions")
   })
 
   socket.emit('subscribe', initialselections)
@@ -42,7 +42,7 @@
   })
 
   socket.on('assertions', ({assertions, selections}) => {
-    assertEq(selections, initialselections)
+    assertEq([selections], initialselections, "assertions:selection")
     if (number_of_assertions === 1) {
       assertEq(assertions, [gorogmoveparsed], "assertions:start")
     }
