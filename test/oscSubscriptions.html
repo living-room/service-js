@@ -1,7 +1,7 @@
 <script src=http://localhost:3000/socket.io/socket.io.js ></script>
 <script>
   const socket = io.connect(`http://localhost:3000`)
-  const initialselection = '$name is at $x, $y'
+  const initialselections = ['$name is at $x, $y']
   const gorogstart = 'gorog is at 0.5, 0.7'
   const gorogmove = 'gorog is at 0.9, 0.7'
   let number_of_assertions = 0
@@ -18,13 +18,13 @@
     console.assert(equals, why, obj1, obj2)
   }
 
-  socket.on('subscribed', ({select, solutions}) => {
-    assertEq(select, initialselection, "subscribed:select")
-    assertEq(solutions, [], "subscribed:solutions")
+  socket.on('subscribed', ({selections, assertions}) => {
+    assertEq(selections, initialselections, "subscribed:selections")
+    assertEq(assertions, [], "subscribed:assertions")
   })
 
-  socket.emit('subscribe', initialselection)
-  
+  socket.emit('subscribe', initialselections)
+
   socket.on('asserted', facts => {
     number_of_assertions++
     if (number_of_assertions == 1) {
@@ -34,23 +34,22 @@
     }
   })
 
-  socket.on('retracted', facts => {
+  socket.on('retracted', retracted => {
     number_of_retractions++
     if (number_of_retractions == 1) {
-      assertEq([gorogstart], facts, "retracted:gorogstart")
+      assertEq([gorogstart], retracted, "retracted:gorogstart")
     }
   })
 
-  socket.on('assertions', ({assertions, selection}) => {
-    assertEq(selection, initialselection)
+  socket.on('assertions', ({assertions, selections}) => {
+    assertEq(selections, initialselections)
     if (number_of_assertions === 1) {
       assertEq(assertions, [gorogmoveparsed], "assertions:start")
     }
   })
 
-   socket.on('retractions', ({retractions, selection}) => {
-    
-    assertEq(selection, initialselection)
+  socket.on('retractions', ({retractions, selections}) => {
+    assertEq(selections, initialselections)
     if (number_of_retractions === 1) {
       assertEq(retractions, [], "retractions:initial")
     } else if (number_of_retractions === 2) {
@@ -60,12 +59,12 @@
 
   setTimeout(() => {
     socket.emit('assert', [gorogstart])
-  }, 10)
+  }, 000)
   setTimeout(() => {
     socket.emit('assert', [gorogmove])
-  }, 200)
+  }, 100)
   setTimeout(() => {
     socket.emit('retract', [gorogstart])
-  }, 300)
+  }, 200)
 
 </script>
