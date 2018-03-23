@@ -49,7 +49,7 @@
   })
 
   socket.on('retractions', ({retractions, selections}) => {
-    assertEq(selections, initialselections)
+    assertEq(selections, initialselections, "retractions:initial")
     if (number_of_retractions === 1) {
       assertEq(retractions, [], "retractions:initial")
     } else if (number_of_retractions === 2) {
