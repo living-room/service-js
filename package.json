@@ -13,9 +13,7 @@
   "scripts": {
     "start": "node server",
     "examples": "serve examples/",
-    "lint": "standard",
-    "lint:fix": "standard --fix",
-    "prepublish": "npm-run-all lint",
+    "format": "prettier-standard *js lib/*js examples/*js",
     "systemd": "npm-run-all systemd:remove systemd:add",
     "systemd:add": "NODE=`which node` sudo -E bash -c '$NODE service.js add'",
     "systemd:remove": "NODE=`which node` sudo -E bash -c '$NODE service.js remove'",
@@ -38,13 +36,13 @@
     "koa-static": "^4.0.2",
     "living-room-database": "jedahan/living-room-database",
     "minimist": "^1.2.0",
-    "osc-js": "^1.2.2"
+    "osc-js": "^1.2.2",
+    "prettier-standard": "^8.0.0"
   },
   "devDependencies": {
     "ava": "^0.25.0",
     "npm-run-all": "^4.1.2",
     "serve": "^6.4.10",
-    "standard": "^10.0.3",
     "supertest": "^3.0.0"
   },
   "optionalDependencies": {
