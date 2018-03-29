@@ -3,11 +3,9 @@
   const socket = io.connect(`http://localhost:3000`)
   const initialselections = ['$name is at $x, $y']
   const gorogstart = 'gorog is at 0.5, 0.7'
-  const gorogmove = 'gorog is at 0.9, 0.7'
-  let number_of_assertions = 0
-  let number_of_retractions = 0
+  const gorogmove = 'gorog is at 0.8, 0.4'
   const gorogstartparsed = {name: {word: "gorog"}, x: {value: 0.5}, y:{value: 0.7}}
-  const gorogmoveparsed = {name: {word: "gorog"}, x: {value: 0.9}, y:{value: 0.7}}
+  const gorogmoveparsed = {name: {word: "gorog"}, x: {value: 0.8}, y:{value: 0.4}}
 
   const assertEq = (obj1, obj2, why) => {
     let equals = obj1 === obj2
@@ -18,53 +16,29 @@
     console.assert(equals, why, obj1, obj2)
   }
 
-  socket.on('subscribed', ({selections, assertions}) => {
-    assertEq([selections], initialselections, "subscribed:selections")
-    assertEq(assertions, undefined, "subscribed:assertions")
-  })
-
-  socket.emit('subscribe', initialselections)
-
-  socket.on('asserted', facts => {
-    number_of_assertions++
-    if (number_of_assertions == 1) {
-      assertEq([gorogstart], facts, "asserted:gorogstart")
-    } else if (number_of_assertions == 2) {
-      assertEq([gorogmove], facts, "asserted:gorogmove")
-    }
-  })
-
-  socket.on('retracted', retracted => {
-    number_of_retractions++
-    if (number_of_retractions == 1) {
-      assertEq([gorogstart], retracted, "retracted:gorogstart")
-    }
-  })
-
-  socket.on('assertions', ({assertions, selections}) => {
-    assertEq([selections], initialselections, "assertions:selection")
-    if (number_of_assertions === 1) {
-      assertEq(assertions, [gorogmoveparsed], "assertions:start")
-    }
-  })
-
-  socket.on('retractions', ({retractions, selections}) => {
-    assertEq(selections, initialselections, "retractions:initial")
-    if (number_of_retractions === 1) {
-      assertEq(retractions, [], "retractions:initial")
-    } else if (number_of_retractions === 2) {
-      assertEq(retractions, [gorogstartparsed], "retractions:parsed")
-    }
-  })
+  setTimeout(() => {
+    let timesChanged = 0
+    socket.on(JSON.stringify(initialselections), ({assertions, retractions}) => {
+      if (timesChanged === 0) {
+        assertEq([gorogstartparsed], assertions, "asserted:gorogstart")
+      } else if (timesChanged === 1) {
+        assertEq([gorogmoveparsed], assertions, "asserted:gorogmove")
+      } else if (timesChanged === 2) {
+        assertEq([gorogstartparsed], retractions, "retracted:gorogstart")
+      }
+      timesChanged++
+    })
+    socket.emit('subscribe', initialselections)
+  }, 050)
 
   setTimeout(() => {
     socket.emit('assert', [gorogstart])
-  }, 000)
-  setTimeout(() => {
-    socket.emit('assert', [gorogmove])
   }, 100)
   setTimeout(() => {
-    socket.emit('retract', [gorogstart])
+    socket.emit('assert', [gorogmove])
   }, 200)
+  setTimeout(() => {
+    socket.emit('retract', [gorogstart])
+  }, 300)
 
 </script>

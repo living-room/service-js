@@ -7,7 +7,7 @@ const Database = require('living-room-database')
 const room = new Database()
 
 let app = require('./lib/httpServer.js')(room.client('http'))
-app = require('./lib/socketServer.js')(app)(room.client('socket'))
+app = require('./lib/socketServer.js')(app, {verbose: true})(room.client('socket'))
 
 let osc = require('./lib/oscServer.js')(room.client('osc'))
 
@@ -15,37 +15,32 @@ app.listen(PORT)
 
 osc.open()
 
-const printInfo = () => {
-  let message = chalk.green('Serving a living room!')
-  message += '\n\n'
+let message = `
+  ${chalk.green('Serving a living room!')}
 
-  const localURL = `http://localhost:${PORT}`
-  message += `- ${chalk.bold('HTTP Local:           ')} ${localURL}`
-  try {
-    const ipAddress = ip.address()
-    const url = `http://${ipAddress}:${PORT}`
-    message += `\n- ${chalk.bold('HTTP On Your Network: ')} ${url}`
-  } catch (err) {}
-  const oscPORT = 41234
-  const oscURL = ` osc://localhost:${oscPORT}`
-  message += `\n- ${chalk.bold('OSC Local:           ')} ${oscURL}`
+${chalk.bold('locally')}
+http://localhost:${PORT}
+socketio://localhost:${PORT}
+osc://localhost:41234
+`
 
   try {
     const ipAddress = ip.address()
-    const url = ` osc://${ipAddress}:${oscPORT}`
-    message += `\n- ${chalk.bold('OSC On Your Network: ')} ${url}`
+    message += `
+${chalk.bold('on the network')}
+http://${ipAddress}:${PORT}
+socketio://${ipAddress}:${PORT}
+osc://${ipAddress}:41234
+`
   } catch (err) {}
 
-  console.log(
-    boxen(message, {
-      padding: 1,
-      borderColor: 'green',
-      margin: 1
-    })
-  )
-}
-
-printInfo()
+console.log(
+  boxen(message, {
+    padding: 1,
+    borderColor: 'green',
+    margin: 1
+  })
+)
 
 process.on('SIGINT', () => {
   console.log()

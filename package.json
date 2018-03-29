@@ -12,7 +12,12 @@
   "license": "MIT",
   "scripts": {
     "start": "node server",
+<<<<<<< HEAD
     "examples": "serve examples/",
+=======
+    "serve:test": "serve test/",
+    "serve:examples": "serve examples/",
+>>>>>>> subscriptions-part-duex
     "format": "prettier-standard *js lib/*js examples/*js",
     "systemd": "npm-run-all systemd:remove systemd:add",
     "systemd:add": "NODE=`which node` sudo -E bash -c '$NODE service.js add'",
@@ -34,7 +39,7 @@
     "koa-route": "3",
     "koa-socket": "^4.4.0",
     "koa-static": "^4.0.2",
-    "living-room-database": "jedahan/living-room-database",
+    "living-room-database": "jedahan/living-room-database#subscriptions",
     "minimist": "^1.2.0",
     "osc-js": "^1.2.2",
     "prettier-standard": "^8.0.0"
