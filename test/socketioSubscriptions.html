@@ -1,7 +1,7 @@
 <script src=http://localhost:3000/socket.io/socket.io.js ></script>
 <script>
   const socket = io.connect(`http://localhost:3000`)
-  const initialselections = ['$name is at $x, $y']
+  
   const gorogstart = 'gorog is at 0.5, 0.7'
   const gorogmove = 'gorog is at 0.8, 0.4'
   const gorogstartparsed = {name: {word: "gorog"}, x: {value: 0.5}, y:{value: 0.7}}
@@ -16,6 +16,8 @@
     console.assert(equals, why, obj1, obj2)
   }
 
+  // subscribe to an interesting sentence
+  const initialselections = ['$name is at $x, $y']
   setTimeout(() => {
     let timesChanged = 0
     socket.on(JSON.stringify(initialselections), ({assertions, retractions}) => {
