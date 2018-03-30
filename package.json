@@ -12,12 +12,8 @@
   "license": "MIT",
   "scripts": {
     "start": "node server",
-<<<<<<< HEAD
-    "examples": "serve examples/",
-=======
     "serve:test": "serve test/",
     "serve:examples": "serve examples/",
->>>>>>> subscriptions-part-duex
     "format": "prettier-standard *js lib/*js examples/*js",
     "systemd": "npm-run-all systemd:remove systemd:add",
     "systemd:add": "NODE=`which node` sudo -E bash -c '$NODE service.js add'",
