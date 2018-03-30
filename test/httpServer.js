@@ -38,6 +38,6 @@ test('select grabs the right fact', async t => {
   const [{name, what, x, y}] = res.body.solutions
   t.is(name.id, 'gorog')
   t.is(what.word, 'barbarian')
-  t.is(x, 99)
-  t.is(y, 11)
+  t.is(x.value, 99)
+  t.is(y.value, 11)
 })
