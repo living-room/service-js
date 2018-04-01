@@ -35,7 +35,7 @@
     "koa-route": "3",
     "koa-socket": "^4.4.0",
     "koa-static": "^4.0.2",
-    "living-room-database": "jedahan/living-room-database#subscriptions",
+    "living-room-database": "jedahan/living-room-database",
     "minimist": "^1.2.0",
     "osc-js": "^1.2.2",
     "prettier-standard": "^8.0.0"
