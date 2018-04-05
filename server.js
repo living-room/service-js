@@ -7,7 +7,7 @@ const Database = require('living-room-database')
 const room = new Database()
 
 let app = require('./lib/httpServer.js')(room.client('http'))
-app = require('./lib/socketServer.js')(app, { verbose: true })(
+app = require('./lib/socketServer.js')(app, { verbose: false })(
   room.client('socket')
 )
 
