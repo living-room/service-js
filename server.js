@@ -7,7 +7,9 @@ const Database = require('living-room-database')
 const room = new Database()
 
 let app = require('./lib/httpServer.js')(room.client('http'))
-app = require('./lib/socketServer.js')(app, {verbose: true})(room.client('socket'))
+app = require('./lib/socketServer.js')(app, { verbose: true })(
+  room.client('socket')
+)
 
 let osc = require('./lib/oscServer.js')(room.client('osc'))
 
@@ -24,15 +26,15 @@ socketio://localhost:${PORT}
 osc://localhost:41234
 `
 
-  try {
-    const ipAddress = ip.address()
-    message += `
+try {
+  const ipAddress = ip.address()
+  message += `
 ${chalk.bold('on the network')}
 http://${ipAddress}:${PORT}
 socketio://${ipAddress}:${PORT}
 osc://${ipAddress}:41234
 `
-  } catch (err) {}
+} catch (err) {}
 
 console.log(
   boxen(message, {
