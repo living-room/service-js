@@ -1,6 +1,6 @@
 {
   "name": "living-room-server",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "main": "server.js",
   "repository": "git@github.com:jedahan/living-room-server.git",
   "author": "Jonathan Dahan <hi@jonathan.is> (http://jedahan.com)",
