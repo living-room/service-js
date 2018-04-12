@@ -28,7 +28,7 @@ After deploying the default branch, the post-receive hook checks it out and rest
     OK
 
     $ curl -d '{"facts": ["$what is an app at ($x, $y)"]}' -H "Content-Type: application/json" localhost:3000/select
-    {"solutions":[{"what":{"id":"curl"},"x":20,"y":30}]}
+    {"assertions":[{"what":{"id":"curl"},"x":20,"y":30}]}
 
 ## example websocket
 
