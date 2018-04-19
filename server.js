@@ -3,7 +3,7 @@ const boxen = require('boxen')
 const ip = require('ip')
 const PORT = process.env.PORT || 3000
 
-const Database = require('living-room-database')
+const Database = require('@living-room/database-js')
 const room = new Database()
 
 let app = require('./lib/httpServer.js')(room.client('http'))

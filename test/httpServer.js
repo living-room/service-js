@@ -1,7 +1,7 @@
 const test = require('ava')
-const Database = require('living-room-database')
+const Database = require('@living-room/database-js')
 const request = require('supertest')
-const httpServer = require('../lib/httpServer.js')
+const httpServer = require('../lib/httpServer')
 
 const gorogInitial = `#gorog is a barbarian at 40, 50`
 const gorogMoves = `#gorog is a barbarian at 99, 11`
