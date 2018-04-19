@@ -1,12 +1,12 @@
-# room-server
+# service-js
 
 Creates a room database that you can connect to over HTTP, socket.io, and osc!
 
-You can test it out by running `node server` after installing the dependencies with `npm install`
+You can test it out by running `npm start` after installing the dependencies with `npm install`
 
-For motivations, context, and philosophy, check out https://github.com/jedahan/research
+For motivations, context, and philosophy, check out https://github.com/living-room/living-room
 
-For a nicer javascript client, check out https://github.com/jedahan/room-client
+For a nicer javascript client, check out https://github.com/living-room/client-js
 
 ## installing
 
@@ -15,7 +15,7 @@ If you have systemd, you can generate and install a service file with `npm run s
 We also have a git [post-receive hook](./hooks/post-receive) which we setup like so:
 
     # on remote machine
-    git clone --bare https://github.com/jedahan/room-server.git room-server.git
+    git clone --bare https://github.com/living-room/service-js.git service-js.git
     mkdir room-server
     # on local machine
     git remote add my-remote-machine ssh://my-remote-machine/home/room/room-server.git
@@ -24,11 +24,11 @@ After deploying the default branch, the post-receive hook checks it out and rest
 
 ## example http
 
-    $ curl -d '{"fact": "#curl is an app at (20, 30)"}' -H "Content-Type: application/json" localhost:3000/assert
+    $ curl -d 'facts=curl is an app at (20, 30)' localhost:3000/assert
     OK
 
-    $ curl -d '{"facts": ["$what is an app at ($x, $y)"]}' -H "Content-Type: application/json" localhost:3000/select
-    {"assertions":[{"what":{"id":"curl"},"x":20,"y":30}]}
+    $ curl -d 'facts=$who is an app at ($x, $y)' localhost:3000/select
+    {"assertions":[{"who":{"word":"curl"},"x":{"value":20},"y":{"value":30}}]}%
 
 ## example websocket
 
