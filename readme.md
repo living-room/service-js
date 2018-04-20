@@ -37,9 +37,9 @@ from [examples/browser.js](examples/browser.js)
 ```javascript
 const socket = io.connect(`http://localhost:3000`)
 
-socket.on('solutions', solutions => {
-  solutions.forEach(solution => {
-    console.log(`what am i? a ${solution.what.str}`)
+socket.on('assertions', assertions => {
+  assertions.forEach(assertion => {
+    console.log(`what am i? a ${assertion.what.str}`)
   })
 })
 
