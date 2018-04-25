@@ -15,7 +15,7 @@ module.exports = class ServiceManager {
     ]
 
     const updateAndDraw = up => ({type, host, port}) => {
-      this.seen.set(`${type}://${host}:${port}`, true)
+      this.seen.set(`${type}://${host}:${port}`, up)
       this.draw()
     }
 
