@@ -1,7 +1,7 @@
 {
   "name": "@living-room/service-js",
   "version": "0.4.0",
-  "main": "server.js",
+  "main": "service.js",
   "repository": "git@github.com:living-room/service-js.git",
   "author": "Jonathan Dahan <hi@jonathan.is> (http://jedahan.com)",
   "contributors": [
@@ -11,23 +11,22 @@
   ],
   "license": "MIT",
   "scripts": {
-    "start": "node server",
+    "start": "node service",
     "serve:test": "serve test/",
     "serve:examples": "serve examples/",
     "format": "prettier-standard *js lib/*js examples/*js",
-    "systemd": "npm-run-all systemd:remove systemd:add",
-    "systemd:add": "NODE=`which node` sudo -E bash -c '$NODE service.js add'",
-    "systemd:remove": "NODE=`which node` sudo -E bash -c '$NODE service.js remove'",
     "test": "ava"
   },
   "keywords": [
     "living-room",
-    "server"
+    "server",
+    "service"
   ],
   "dependencies": {
     "@koa/cors": "2",
-    "@living-room/database-js": "^0.3.0",
-    "@living-room/parser-js": "^0.1.0",
+    "@living-room/database-js": "^0.4.0",
+    "@living-room/parser-js": "^0.4.0",
+    "ava": "^1.0.0-beta.4",
     "boxen": "^1.3.0",
     "chalk": "^2.3.2",
     "ip": "^1.1.5",
@@ -36,19 +35,14 @@
     "koa-route": "3",
     "koa-socket": "^4.4.0",
     "koa-static": "^4.0.2",
-    "mdns": "^2.3.4",
     "minimist": "^1.2.0",
-    "osc": "^2.2.0",
-    "osc-js": "^1.2.2"
+    "nbonjour": "^3.6.1",
+    "osc": "^2.2.1-dev.20180205T232925Z.6deb74c"
   },
   "devDependencies": {
-    "ava": "^0.25.0",
     "npm-run-all": "^4.1.2",
-    "serve": "^6.4.10",
-    "supertest": "^3.0.0",
-    "prettier-standard": "^8.0.1"
-  },
-  "optionalDependencies": {
-    "service-systemd": "^3.3.0"
+    "prettier-standard": "^8.0.1",
+    "serve": "^6.5.6",
+    "supertest": "^3.0.0"
   }
 }
