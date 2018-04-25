@@ -1,17 +1,14 @@
-const PORT = parseInt(process.env.PORT || '3000')
-const OSC_PORT = parseInt(process.env.OSC_PORT || '41234')
-
 const Database = require('@living-room/database-js')
 const room = new Database()
 
+const socketService = require('./src/SocketService')
+  .create(room.client('socket'), { app: require('./src/httpServer'), verbose: false })
+
+const oscService = require('./src/OscService')
+  .create(room.client('osc'))
+
 const ServiceManager = require('./src/ServiceManager')
-const serviceManager = new ServiceManager()
-
-let app = require('./lib/httpServer.js')(room.client('http'))
-
-require('./lib/socketServer.js')(app, { verbose: false })(room.client('socket')).listen(PORT)
-
-require('./lib/oscServer.js')(room.client('osc')).listen(OSC_PORT)
+const manager = new ServiceManager(...socketService, oscService)
 
 process.on('SIGINT', () => {
   console.log()

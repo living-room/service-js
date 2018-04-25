@@ -61,6 +61,7 @@ app.use(body())
 if (opts.verbose) {
   app.use(log())
 }
+
 app.use(route.get('/ping', async context => { context.body = 'pong' }))
 app.use(route.post('/assert', assert))
 app.use(route.post('/select', select))
@@ -68,11 +69,4 @@ app.use(route.post('/retract', retract))
 app.use(route.get('/facts', facts))
 app.use(static_('examples'))
 
-module.exports = client => {
-  app.context.client = client
-  // should be app.on('listening', () => {
-  const name = process.env.LIVING_ROOM_NAME || require('os').hostname()
-  const bonjour = require('nbonjour').create()
-  bonjour.publish({name, type: 'http', protocol: 'tcp', subtypes: ['livingroom'], port: 3000})
-  return app
-}
+module.exports = app 

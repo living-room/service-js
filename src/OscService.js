@@ -40,14 +40,14 @@ class LivingRoomOscServer {
     })
   }
 
-  listen (localPort = 41234, localAddress = '0.0.0.0') {
+  listen (service, localAddress = '0.0.0.0') {
     const { UDPPort } = require('osc')
-    const osc = new UDPPort({ localAddress, localPort })
+    const osc = new UDPPort({ localAddress, localPort: service.port })
 
     osc.on(`ready`, () => {
       const name = process.env.LIVING_ROOM_NAME || require('os').hostname()
       const bonjour = require('nbonjour').create()
-      bonjour.publish({name, type: 'osc', protocol: 'udp', subtypes: ['livingroom'], port: localPort})
+      bonjour.publish(service)
     })
 
     osc.on('message', ({address, args}, _, {address: remoteAddress}) => {
@@ -69,4 +69,11 @@ class LivingRoomOscServer {
   }
 }
 
-module.exports = client => new LivingRoomOscServer(client)
+module.exports = {
+  create: client => {
+    const server = new LivingRoomOscServer(client)
+    const service = require('./util').makeService('osc', 'udp')
+    server.listen(service)
+    return service
+  }
+}

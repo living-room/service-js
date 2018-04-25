@@ -29,30 +29,46 @@ io.on('connection', ({ socket, client, subscriptions }) => {
   })
 })
 
-module.exports = (app, { verbose }) => client => {
-  if (verbose) {
+module.exports = {
+  create: (client, {app, verbose}) => {
+    const name = process.env.LIVING_ROOM_NAME || require('os').hostname()
+    
+    const services = [require('./util').makeService('socketio', 'tcp')]
+    
+    if (app) {
+      app.context.client = client
+      services.push(require('./util').makeService('http', 'tcp'))
+    } else {
+      const Koa = require('koa')
+      app = new Koa()
+    }
+
+    if (verbose) {
+      io.use(async (context, next) => {
+        console.log(`<- ${context.event} ${context.data}`)
+        await next()
+        console.log(`<- ${context.event} ${context.data}`)
+      })
+    }
+
+    const subscriptions = new Set()
+
     io.use(async (context, next) => {
-      console.log(`<- ${context.event} ${context.data}`)
+      context.client = client
+      context.subscriptions = subscriptions
       await next()
-      console.log(`<- ${context.event} ${context.data}`)
     })
+
+    io.attach(app)
+
+    const bonjour = require('nbonjour').create()
+    
+    app.listen(services[0].port, () => {
+      for (const service of services) {
+        bonjour.publish(service)
+      }
+    })
+
+    return services
   }
-
-  const subscriptions = new Set()
-
-  io.use(async (context, next) => {
-    context.client = client
-    context.subscriptions = subscriptions
-    context.ad = ad
-    await next()
-  })
-
-  io.attach(app)
-
-  // FIXME: wrap app.listen to do this
-  const name = process.env.LIVING_ROOM_NAME || require('os').hostname()
-  const bonjour = require('nbonjour').create()
-  bonjour.publish({name, type: 'socketio', protocol: 'tcp', subtypes: ['livingroom'], port: 3000})
-
-  return app
 }

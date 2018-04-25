@@ -1,18 +1,11 @@
 const boxen = require('boxen')
 const chalk = require('chalk').default
 const bonjour = require('nbonjour').create()
-const name = process.env.LIVING_ROOM_NAME || require('os').hostname()
 
 module.exports = class ServiceManager {
-  constructor(name) {
+  constructor(...services) {
     // seen: Map<url: String, up: bool>
     this.seen = new Map()
-
-    const services = [
-      { name, type: 'http', protocol: 'tcp', subtypes: ['livingroom'] },
-      { name, type: 'osc', protocol: 'udp', subtypes: ['livingroom'] },
-      { name, type: 'socketio', protocol: 'tcp', subtypes: ['livingroom'] }
-    ]
 
     const updateAndDraw = up => ({type, host, port}) => {
       this.seen.set(`${type}://${host}:${port}`, up)
