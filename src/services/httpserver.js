@@ -6,7 +6,8 @@ const cors = require('@koa/cors')
 const route = require('koa-route')
 const static_ = require('koa-static')
 
-const opts = require('minimist')(process.argv.slice(2))
+const minimist = require('minimist')
+const opts = minimist(process.argv.slice(2))
 
 const log = () => async (context, next) => {
   const requestBody = util.inspect(context.request.body)
@@ -42,12 +43,6 @@ const retract = async context => {
   context.body = { facts }
 }
 
-const retractEverythingAbout = async context => {
-  const { name } = context.request.body
-  await context.client.immediatelyRetractEverythingAbout(name)
-  context.status = 200
-}
-
 const select = async context => {
   let { facts } = context.request.body
   if (typeof facts === 'string') facts = [facts]
@@ -67,15 +62,16 @@ app.use(body())
 if (opts.verbose) {
   app.use(log())
 }
-app.use(route.get('/ping', async context => context.body = 'pong'))
-app.use(route.all('/assert', assert))
-app.use(route.all('/select', select))
-app.use(route.all('/retract', retract))
-app.use(route.all('/retractEverythingAbout', retractEverythingAbout))
-app.use(route.all('/facts', facts))
+
+app.use(
+  route.get('/ping', async context => {
+    context.body = 'pong'
+  })
+)
+app.use(route.post('/assert', assert))
+app.use(route.post('/select', select))
+app.use(route.post('/retract', retract))
+app.use(route.get('/facts', facts))
 app.use(static_('examples'))
 
-module.exports = client => {
-  app.context.client = client
-  return app
-}
+module.exports = app
