@@ -67,6 +67,7 @@ class OscServer {
   }
 }
 
+// create(client: Room.Client): Service
 module.exports = {
   create: client => {
     const server = new OscServer(client)

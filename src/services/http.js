@@ -1,3 +1,4 @@
+// create(client: Room.Client): Service
 module.exports = {
   create: client => {
     const httpServer = require('./httpserver')

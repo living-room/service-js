@@ -1,3 +1,4 @@
+// create(client: Room.Client): Service
 module.exports = {
   create: (client, { app, verbose }) => {
     const Socket = require('koa-socket')
