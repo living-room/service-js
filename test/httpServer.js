@@ -6,7 +6,7 @@ const gorogInitial = `#gorog is a barbarian at 40, 50`
 const gorogMoves = `#gorog is a barbarian at 99, 11`
 
 const createApp = () => {
-  const httpServer = require('../src/httpServer')
+  const httpServer = require('../src/services/httpserver')
   httpServer.context.client = new Database().client('http')
   return httpServer.listen()
 }

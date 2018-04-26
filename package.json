@@ -14,7 +14,7 @@
     "start": "node service",
     "serve:test": "serve test/",
     "serve:examples": "serve examples/",
-    "format": "prettier-standard *js lib/*js examples/*js",
+    "format": "prettier-standard *js src/**/*js examples/*js",
     "test": "ava"
   },
   "keywords": [

@@ -3,32 +3,30 @@ class OscServer {
     this.client = client
     this.connections = new Map()
     this.messageHandlers = {
-      '/echo': ({connection, args}) => {
+      '/echo': ({ connection, args }) => {
         this.send(connection, '/echo', args)
       },
-      '/assert': ({args}) => {
+      '/assert': ({ args }) => {
         args.forEach(fact => {
           this.client.assert(fact)
         })
         this.client.flushChanges()
       },
-      '/retract': ({args}) => {
+      '/retract': ({ args }) => {
         args.forEach(fact => {
           this.client.retract(fact)
         })
         this.client.flushChanges()
       },
-      '/select': ({connection, args}) => {
-        this.client.select({facts: args})
-          .then(({assertions}) => {
-            this.send(connection, '/assertions', JSON.stringify(assertions))
-          })
+      '/select': ({ connection, args }) => {
+        this.client.select({ facts: args }).then(({ assertions }) => {
+          this.send(connection, '/assertions', JSON.stringify(assertions))
+        })
       },
-      '/subscribe': ({connection, args}) => {
-        this.client.subscribe({facts: args})
-          .then(() => {
-            this.send(connection, '/subscriptions', JSON.stringify(args))
-          })
+      '/subscribe': ({ connection, args }) => {
+        this.client.subscribe({ facts: args }).then(() => {
+          this.send(connection, '/subscriptions', JSON.stringify(args))
+        })
       }
     }
   }
@@ -36,7 +34,7 @@ class OscServer {
   send (connection, address, string) {
     connection.send({
       address,
-      args: [ { type: 's', value: string } ]
+      args: [{ type: 's', value: string }]
     })
   }
 
@@ -50,18 +48,18 @@ class OscServer {
       bonjour.publish(service)
     })
 
-    osc.on('message', ({address, args}, _, {address: remoteAddress}) => {
+    osc.on('message', ({ address, args }, _, { address: remoteAddress }) => {
       const remotePort = args[0]
       const id = `osc://${remoteAddress}:${remotePort}`
 
       if (!this.connections.has(id)) {
-        const connection = new UDPPort({remoteAddress, remotePort})
+        const connection = new UDPPort({ remoteAddress, remotePort })
         this.connections.set(id, connection)
       }
 
       const connection = this.connections.get(id)
       const handle = this.messageHandlers[address]
-      handle({address, args, connection})
+      handle({ address, args, connection })
     })
 
     this.osc = osc
@@ -72,7 +70,8 @@ class OscServer {
 module.exports = {
   create: client => {
     const server = new OscServer(client)
-    const service = require('./util').makeService('osc', 'udp')
+    const { makeService } = require('../living-room-services')
+    const service = makeService('osc', 'udp')
     server.listen(service)
     return service
   }

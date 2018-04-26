@@ -1,19 +1,19 @@
 module.exports = {
-  create: (client, {app, verbose}) => {
+  create: (client, { app, verbose }) => {
     const Socket = require('koa-socket')
     const io = new Socket()
 
-    const name = process.env.LIVING_ROOM_NAME || require('os').hostname()
+    const { makeService } = require('../living-room-services')
 
-    const services = [require('./util').makeService('socketio', 'tcp')]
+    const services = [makeService('socketio', 'tcp')]
 
     if (app) {
-      services.push(require('./util').makeService('http', 'tcp'))
+      services.push(makeService('http', 'tcp'))
     } else {
       const Koa = require('koa')
       app = new Koa()
     }
-    
+
     io.attach(app)
 
     app.context.client = app.context.client || client
@@ -52,14 +52,23 @@ module.exports = {
       await client.select(facts).doAll(acknowledge)
     })
 
-    io.on('subscribe', async ({ data: patternsString, socket, client, subscriptions, acknowledge }) => {
-      const patterns = JSON.parse(patternsString)
-      const subscription = client.subscribe(patterns, changes => {
-        socket.emit(patternsString, changes)
-      })
-      subscriptions.add(subscription)
-      if (acknowledge) acknowledge(subscription)
-    })
+    io.on(
+      'subscribe',
+      async ({
+        data: patternsString,
+        socket,
+        client,
+        subscriptions,
+        acknowledge
+      }) => {
+        const patterns = JSON.parse(patternsString)
+        const subscription = client.subscribe(patterns, changes => {
+          socket.emit(patternsString, changes)
+        })
+        subscriptions.add(subscription)
+        if (acknowledge) acknowledge(subscription)
+      }
+    )
 
     const bonjour = require('nbonjour').create()
 

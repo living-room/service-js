@@ -63,11 +63,15 @@ if (opts.verbose) {
   app.use(log())
 }
 
-app.use(route.get('/ping', async context => { context.body = 'pong' }))
+app.use(
+  route.get('/ping', async context => {
+    context.body = 'pong'
+  })
+)
 app.use(route.post('/assert', assert))
 app.use(route.post('/select', select))
 app.use(route.post('/retract', retract))
 app.use(route.get('/facts', facts))
 app.use(static_('examples'))
 
-module.exports = app 
+module.exports = app

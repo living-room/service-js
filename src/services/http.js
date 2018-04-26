@@ -1,9 +1,10 @@
 module.exports = {
   create: client => {
-    const httpServer = require('./httpServer')
+    const httpServer = require('./httpserver')
     httpServer.context.client = client
 
-    const service = require('./util').makeService('http', 'tcp')
+    const { makeService } = require('../living-room-services')
+    const service = makeService('http', 'tcp')
 
     httpServer.listen(service.port, () => {
       const bonjour = require('nbonjour').create()
