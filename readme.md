@@ -1,24 +1,22 @@
 # service-js
 
-Creates a room database that you can connect to over HTTP, socket.io, and osc!
+Creates a living room that you can connect to over HTTP, socket.io, and osc!
 
 You can test it out by running `npm start` after installing the dependencies with `npm install`
 
 For motivations, context, and philosophy, check out https://github.com/living-room/living-room
 
-For a nicer javascript client, check out https://github.com/living-room/client-js
+For a nice javascript client, check out https://github.com/living-room/client-js
 
 ## installing
 
-If you have systemd, you can generate and install a service file with `npm run systemd`
-
-We also have a git [post-receive hook](./hooks/post-receive) which we setup like so:
+There is a git [post-receive hook](./hooks/post-receive) which we setup like so:
 
     # on remote machine
     git clone --bare https://github.com/living-room/service-js.git service-js.git
-    mkdir room-server
+    mkdir service-js
     # on local machine
-    git remote add my-remote-machine ssh://my-remote-machine/home/room/room-server.git
+    git remote add my-remote-machine ssh://my-remote-machine/home/livingroom/service-js.git
 
 After deploying the default branch, the post-receive hook checks it out and restarts the system service. neat.
 
@@ -30,33 +28,45 @@ After deploying the default branch, the post-receive hook checks it out and rest
     $ curl -d 'facts=$who is an app at ($x, $y)' localhost:3000/select
     {"assertions":[{"who":{"word":"curl"},"x":{"value":20},"y":{"value":30}}]}%
 
-## example websocket
+## example socket.io
 
-from [examples/browser.js](examples/browser.js)
+    npm run serve:examples && open http://localhost:5000
+
+from [examples/browser.html](examples/browser.html)
 
 ```javascript
 const socket = io.connect(`http://localhost:3000`)
 
-socket.on('assertions', assertions => {
-  assertions.forEach(assertion => {
-    console.log(`what am i? a ${assertion.what.str}`)
+// The pattern we want to match on
+const pattern = 'ping $number'
+
+let pong = 0
+
+// To subscribe pass in the JSON of an array of patterns
+const patternsString = JSON.stringify([pattern])
+
+// We will get back an object, we just care about new assertions
+socket.on(patternsString, ({assertions}) => {
+  assertions.forEach(({number}) => {
+    const value = parseInt(number.value)
+    if (value > pong) pong = value
+    console.log(`<- pong ${pong}`)
+    pong++
   })
 })
+socket.emit('subscribe', patternsString)
 
-socket.on('id', ({id}) => {
-  console.log(`got id '${id}'`)
-})
-
-socket.emit('assert', ['i am a browser'])
-
+// Start pinging from highest previous ping
 setInterval(() => {
-  socket.emit('select', ['i am a $what'])
-}, 5000)
+  socket.emit('assert', `ping ${pong}`, data => {
+    console.log(`-> ${data[0]}`)
+  })
+}, 1500)
 ```
 
 ## example opensoundcontrol
 
-from [examples/osc.pde](examples/osc.pde)
+from [examples/osc/osc.pde](examples/osc/osc.pde)
 
 ```processing
 /**

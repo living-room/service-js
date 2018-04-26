@@ -1,2 +1,30 @@
-<script src=socket.io/socket.io.js ></script>
-<script src=browser.js></script>
+<script src=http://localhost:3000/socket.io/socket.io.js ></script>
+<script>
+const socket = io.connect(`http://localhost:3000`)
+
+// The pattern we want to match on
+const pattern = 'ping $number'
+
+let pong = 0
+
+// To subscribe pass in the JSON of an array of patterns
+const patternsString = JSON.stringify([pattern])
+
+// We will get back an object, we just care about new assertions
+socket.on(patternsString, ({assertions}) => {
+  assertions.forEach(({number}) => {
+    const value = parseInt(number.value)
+    if (value > pong) pong = value
+    console.log(`<- pong ${pong}`)
+    pong++
+  })
+})
+socket.emit('subscribe', patternsString)
+
+// Start pinging from highest previous ping
+setInterval(() => {
+  socket.emit('assert', `ping ${pong}`, data => {
+    console.log(`-> ${data[0]}`)
+  })
+}, 1500)
+</script>
