@@ -1,4 +1,4 @@
-class LivingRoomOscServer {
+class OscServer {
   constructor (client) {
     this.client = client
     this.connections = new Map()
@@ -71,7 +71,7 @@ class LivingRoomOscServer {
 
 module.exports = {
   create: client => {
-    const server = new LivingRoomOscServer(client)
+    const server = new OscServer(client)
     const service = require('./util').makeService('osc', 'udp')
     server.listen(service)
     return service

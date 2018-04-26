@@ -7,7 +7,7 @@ module.exports = {
 
     httpServer.listen(service.port, () => {
       const bonjour = require('nbonjour').create()
-      bonjour.publish(service.port)
+      bonjour.publish(service)
     })
 
     return service

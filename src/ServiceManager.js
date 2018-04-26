@@ -23,6 +23,7 @@ module.exports = class ServiceManager {
 
   draw() {
     let message = ['living room servers at', '']
+
     for (const [url, up] of this.seen) {
       message.push(up ? chalk.green(url) : chalk.red(url))
     }
@@ -32,7 +33,7 @@ module.exports = class ServiceManager {
       padding: 1,
       margin: 1
     }
+
     console.log(boxen(message.join('\n'), formatting))
   }
-
 }

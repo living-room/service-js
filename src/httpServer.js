@@ -6,7 +6,8 @@ const cors = require('@koa/cors')
 const route = require('koa-route')
 const static_ = require('koa-static')
 
-const opts = require('minimist')(process.argv.slice(2))
+const minimist = require('minimist')
+const opts = minimist(process.argv.slice(2))
 
 const log = () => async (context, next) => {
   const requestBody = util.inspect(context.request.body)
@@ -56,7 +57,7 @@ const facts = async context => {
 }
 
 const app = new Koa()
-app.use(cors)
+app.use(cors())
 app.use(body())
 if (opts.verbose) {
   app.use(log())
