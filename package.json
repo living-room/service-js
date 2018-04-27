@@ -28,16 +28,16 @@
     "@living-room/parser-js": "^0.4.0",
     "ava": "^1.0.0-beta.4",
     "boxen": "^1.3.0",
-    "chalk": "^2.3.2",
+    "chalk": "^2.4.1",
     "ip": "^1.1.5",
-    "koa": "2",
+    "koa": "^2.5.1",
     "koa-body": "2",
     "koa-route": "3",
     "koa-socket": "^4.4.0",
     "koa-static": "^4.0.2",
     "minimist": "^1.2.0",
     "nbonjour": "^3.6.1",
-    "osc": "^2.2.1-dev.20180205T232925Z.6deb74c"
+    "osc": "^2.2.1"
   },
   "devDependencies": {
     "npm-run-all": "^4.1.2",
