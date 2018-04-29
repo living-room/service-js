@@ -44,8 +44,8 @@ class OscServer {
 
     osc.on(`ready`, () => {
       const name = process.env.LIVING_ROOM_NAME || require('os').hostname()
-      const bonjour = require('nbonjour').create()
-      bonjour.publish(service)
+      const stw = require('spread-the-word').default
+      stw.spread(service)
     })
 
     osc.on('message', ({ address, args }, _, { address: remoteAddress }) => {

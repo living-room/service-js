@@ -1,44 +1,58 @@
 const boxen = require('boxen')
 const chalk = require('chalk').default
-const bonjour = require('nbonjour').create()
+const stw = require('spread-the-word').default
 
 class ServiceManager {
   constructor(...services) {
     // seen: Map<url: String, up: bool>
     this.seen = new Map()
 
-    const updateAndDraw = up => ({type, host, port}) => {
-      this.seen.set(`${type}://${host}:${port}`, up)
+    const updateAndDraw = up => ({type, protocol, hostname, port, subtypes}) => {
+      const subtype = subtypes.length === 1 ? type : subtypes[subtypes.length - 1]
+      this.seen.set(`${subtype} ${type}://${hostname}:${port}`, up)
       this.draw()
     }
 
-    this.browsers = services.map(service => {
-      const browser = bonjour.find(service)
-      browser.on('up', updateAndDraw(true))
-      browser.on('down', updateAndDraw(false))
-      browser.start()
-      return browser
-    })
+    stw.on('up', updateAndDraw(true))
+    stw.on('down', updateAndDraw(false))
+
+    this.browsers = services.map(async service => await stw.listen(service))
   }
 
   draw() {
-    let message = ['living room servers at', '']
+    const { table, getBorderCharacters } = require('table')
 
+    const data = []
     for (const [url, up] of this.seen) {
-      message.push(up ? chalk.green(url) : chalk.red(url))
+      const seen = url.split(' ')
+      const type = seen.splice(0, 1)
+      const colorType = up ? chalk.green(...type) : chalk.red(...type)
+      data.push([ colorType, seen ])
     }
 
     const formatting = {
-      borderColor: 'white',
+      borderColor: 'magenta',
       padding: 1,
       margin: 1
     }
 
-    console.log(boxen(message.join('\n'), formatting))
+    const config = {
+      columns: { 0: { alignment: 'right' } },
+      border: getBorderCharacters('void'),
+      columnDefault: {
+          paddingLeft: 0,
+          paddingRight: 1
+      },
+      drawHorizontalLine: () => {
+          return false
+      }
+    }
+    const message = 'living room servers at\n\n' + table(data, config)
+    console.log(boxen(message, formatting))
   }
 }
 
-const makeService = (type, protocol) => {
+const makeService = (type, protocol, subtype) => {
   const defaults = {
       http: '3000',
       socketio: '3000',
@@ -48,6 +62,7 @@ const makeService = (type, protocol) => {
   const port = parseInt(process.env[`LIVING_ROOM_${type.toUpperCase}_PORT`] || defaults[type])
   const name = process.env.LIVING_ROOM_NAME || require('os').hostname()
   const subtypes = ['livingroom']
+  if(subtype) subtypes.push(subtype)
   return {type, protocol, port, name, subtypes}
 }
 

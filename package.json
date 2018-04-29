@@ -36,8 +36,9 @@
     "koa-socket": "^4.4.0",
     "koa-static": "^4.0.2",
     "minimist": "^1.2.0",
-    "nbonjour": "^3.6.1",
-    "osc": "^2.2.1"
+    "osc": "^2.2.1",
+    "spread-the-word": "^0.4.1",
+    "table": "^4.0.3"
   },
   "devDependencies": {
     "npm-run-all": "^4.1.2",

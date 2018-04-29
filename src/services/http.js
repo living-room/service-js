@@ -8,8 +8,8 @@ module.exports = {
     const service = makeService('http', 'tcp')
 
     httpServer.listen(service.port, () => {
-      const bonjour = require('nbonjour').create()
-      bonjour.publish(service)
+      const stw = require('spread-the-word').default
+      stw.spread(service)
     })
 
     return service
