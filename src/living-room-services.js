@@ -33,7 +33,9 @@ class ServiceManager {
     const formatting = {
       borderColor: 'cyanBright',
       padding: 1,
-      margin: 1
+      borderStyle: 'round',
+      float: 'center',
+      dimBorder: true
     }
 
     const config = {
