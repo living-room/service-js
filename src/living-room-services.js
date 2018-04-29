@@ -26,12 +26,12 @@ class ServiceManager {
     for (const [url, up] of this.seen) {
       const seen = url.split(' ')
       const type = seen.splice(0, 1)
-      const colorType = up ? chalk.green(...type) : chalk.red(...type)
+      const colorType = up ? chalk.greenBright(...type) : chalk.red(...type)
       data.push([ colorType, seen ])
     }
 
     const formatting = {
-      borderColor: 'magenta',
+      borderColor: 'cyanBright',
       padding: 1,
       margin: 1
     }
@@ -47,7 +47,7 @@ class ServiceManager {
           return false
       }
     }
-    const message = 'living room servers at\n\n' + table(data, config)
+    const message = chalk.keyword('hotpink')('living room servers at\n\n') + table(data, config)
     console.log(boxen(message, formatting))
   }
 }
