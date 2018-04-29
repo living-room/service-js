@@ -4,7 +4,7 @@ Creates a living room that you can connect to over HTTP, socket.io, and osc!
 
 You can test it out by running `npm start` after installing the dependencies with `npm install`
 
-!["image of server running in cli"](images/npmstart.png)
+<img src="./images/npmstart.png" width="345" align="right" />
 
 For motivations, context, and philosophy, check out https://github.com/living-room/living-room
 
