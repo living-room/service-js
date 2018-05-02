@@ -44,8 +44,8 @@ class OscServer {
 
     osc.on(`ready`, () => {
       const name = process.env.LIVING_ROOM_NAME || require('os').hostname()
-      const stw = require('spread-the-word').default
-      stw.spread(service)
+      const nbonjour = require('nbonjour').create()
+      nbonjour.publish(service)
     })
 
     osc.on('message', ({ address, args }, _, { address: remoteAddress }) => {
@@ -72,7 +72,7 @@ module.exports = {
   create: client => {
     const server = new OscServer(client)
     const { makeService } = require('../living-room-services')
-    const service = makeService('osc', 'udp')
+    const service = makeService({name: "living room osc", type: 'osc', protocol: 'udp'})
     server.listen(service)
     return service
   }

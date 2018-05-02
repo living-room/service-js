@@ -6,10 +6,10 @@ module.exports = {
 
     const { makeService } = require('../living-room-services')
 
-    const services = [makeService('http', 'tcp', 'socketio')]
+    const services = [makeService({name: 'living room socketio', type: 'http', subtype: 'socketio'})]
 
     if (app) {
-      services.push(makeService('http', 'tcp'))
+      services.push(makeService({name: 'living room http', type: 'http'}))
     } else {
       const Koa = require('koa')
       app = new Koa()
@@ -72,8 +72,8 @@ module.exports = {
     )
 
     app.listen(services[0].port, async () => {
-      const stw = require('spread-the-word').default
-      services.forEach(async service => await stw.spread(service))
+      const nbonjour = require('nbonjour').create()
+      services.forEach(async service => await nbonjour.publish(service))
     })
 
     return services

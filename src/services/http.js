@@ -5,11 +5,11 @@ module.exports = {
     httpServer.context.client = client
 
     const { makeService } = require('../living-room-services')
-    const service = makeService('http', 'tcp')
+    const service = makeService({name: "living room http", type: 'http'})
 
     httpServer.listen(service.port, () => {
-      const stw = require('spread-the-word').default
-      stw.spread(service)
+      const nbonjour = require('nbonjour').create()
+      nbonjour.publish(service)
     })
 
     return service

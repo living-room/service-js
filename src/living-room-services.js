@@ -1,22 +1,26 @@
 const boxen = require('boxen')
 const chalk = require('chalk').default
-const stw = require('spread-the-word').default
+const nbonjour = require('nbonjour').create()
 
 class ServiceManager {
   constructor(...services) {
     // seen: Map<url: String, up: bool>
     this.seen = new Map()
 
-    const updateAndDraw = up => ({type, protocol, hostname, port, subtypes}) => {
+    const updateAndDraw = up => (wut, b, c, d) => {
+      const {type, protocol, host, port, subtypes, referer} = wut
       const subtype = subtypes.length === 1 ? type : subtypes[subtypes.length - 1]
-      this.seen.set(`${subtype} ${type}://${hostname}:${port}`, up)
+      this.seen.set(`${subtype} ${type}://${host}:${port}`, up)
       this.draw()
     }
 
-    stw.on('up', updateAndDraw(true))
-    stw.on('down', updateAndDraw(false))
-
-    this.browsers = services.map(async service => await stw.listen(service))
+    this.browsers = services.map(async service => {
+      const browser = nbonjour.find(service)
+      browser.on('up', updateAndDraw(true))
+      browser.on('down', updateAndDraw(false))
+      browser.start()
+      return browser
+    })
   }
 
   draw() {
@@ -54,7 +58,7 @@ class ServiceManager {
   }
 }
 
-const makeService = (type, protocol, subtype) => {
+const makeService = ({name, type, protocol, subtype}) => {
   const defaults = {
       http: '3000',
       socketio: '3000',
@@ -62,10 +66,11 @@ const makeService = (type, protocol, subtype) => {
   }
 
   const port = parseInt(process.env[`LIVING_ROOM_${type.toUpperCase}_PORT`] || defaults[type])
-  const name = process.env.LIVING_ROOM_NAME || require('os').hostname()
+  const hostname = process.env.LIVING_ROOM_NAME || require('os').hostname()
+  const host = `${hostname}.local`
   const subtypes = ['livingroom']
   if(subtype) subtypes.push(subtype)
-  return {type, protocol, port, name, subtypes}
+  return {type, protocol, port, name, subtypes, host}
 }
 
 module.exports = { ServiceManager, makeService }
