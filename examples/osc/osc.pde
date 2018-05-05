@@ -14,7 +14,7 @@ void setup() {
   frameRate(25);
   oscP5 = new OscP5(this, 12000);
 
-  myRemoteLocation = new NetAddress("127.0.0.1",41234);
+  myRemoteLocation = new NetAddress("127.0.0.1", 41234);
 }
 
 
@@ -32,6 +32,16 @@ void mousePressed() {
   oscP5.send(assert2Message, myRemoteLocation);
 
   OscMessage selectMessage = new OscMessage("/select");
+  selectMessage.add("12000");
   selectMessage.add("$name is a $type at ($x, $y)");
   oscP5.send(selectMessage, myRemoteLocation); 
+}
+
+/* incoming osc message are forwarded to the oscEvent method. */
+void oscEvent(OscMessage theOscMessage) {
+  /* print the address pattern and the typetag of the received OscMessage */
+  print("### received an osc message.");
+  String jsonString = theOscMessage.get(0).stringValue();
+  JSONObject facts = JSONObject.parse("{\"facts\": " + jsonString + "}");
+  println(facts.get("facts"));
 }

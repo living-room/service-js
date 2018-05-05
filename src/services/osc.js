@@ -19,7 +19,10 @@ class OscServer {
         this.client.flushChanges()
       },
       '/select': ({ connection, args }) => {
-        this.client.select({ facts: args }).then(({ assertions }) => {
+        const facts = args.splice(1)
+        connection.options.remotePort = parseInt(args[0])
+
+        this.client.select(...facts).doAll(assertions => {
           this.send(connection, '/assertions', JSON.stringify(assertions))
         })
       },
@@ -31,10 +34,11 @@ class OscServer {
     }
   }
 
-  send (connection, address, string) {
+  send (connection, address, factString) {
+    connection.open()
     connection.send({
       address,
-      args: [{ type: 's', value: string }]
+      args: [{ type: 's', value: factString}]
     })
   }
 
@@ -48,8 +52,7 @@ class OscServer {
       nbonjour.publish(service)
     })
 
-    osc.on('message', ({ address, args }, _, { address: remoteAddress }) => {
-      const remotePort = args[0]
+    osc.on('message', ({ address, args }, _, { address: remoteAddress, port: remotePort }) => {
       const id = `osc://${remoteAddress}:${remotePort}`
 
       if (!this.connections.has(id)) {
