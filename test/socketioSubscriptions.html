@@ -22,12 +22,15 @@
     let timesChanged = 0
     socket.on(initialselections, ({assertions, retractions}) => {
       if (timesChanged === 0) {
+        assertEq([], assertions, "asserted:gorogstart:previousassertions")
+        assertEq([], retractions, "asserted:gorogstart:previousretractions")
+      } else if (timesChanged === 1) {
         assertEq([gorogstartparsed], assertions, "asserted:gorogstart:assertions")
         assertEq([], retractions, "asserted:gorogstart:retractions")
-      } else if (timesChanged === 1) {
+      } else if (timesChanged === 2) {
         assertEq([gorogmoveparsed], assertions, "asserted:gorogmove:assertions")
         assertEq([], retractions, "asserted:gorogmove:retractions")
-      } else if (timesChanged === 2) {
+      } else if (timesChanged === 3) {
         assertEq([], assertions, "asserted:gorogmove:assertions")
         assertEq([gorogstartparsed], retractions, "retracted:gorogstart:retractions")
         console.log(`tests passed!`)
