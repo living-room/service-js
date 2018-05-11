@@ -6,12 +6,16 @@ class ServiceManager {
   constructor(...services) {
     // seen: Map<url: String, up: bool>
     this.seen = new Map()
+    this.drawTimeout = null
 
     const updateAndDraw = up => (wut, b, c, d) => {
       const {type, protocol, host, port, subtypes, referer} = wut
       const subtype = subtypes.length === 1 ? type : subtypes[subtypes.length - 1]
       this.seen.set(`${subtype} ${type}://${host}:${port}`, up)
-      this.draw()
+      if (this.drawTimeout) {
+        clearTimeout(this.drawTimeout)
+      }
+      this.drawTimeout = setTimeout(() => this.draw(), 150)
     }
 
     this.browsers = services.map(async service => {

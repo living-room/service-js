@@ -1,6 +1,6 @@
 {
   "name": "@living-room/service-js",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "main": "service.js",
   "repository": "git@github.com:living-room/service-js.git",
   "author": "Jonathan Dahan <hi@jonathan.is> (http://jedahan.com)",
