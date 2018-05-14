@@ -90,7 +90,7 @@ if (opts.verbose) {
   app.use(log())
 }
 
-const factParser = async context => {
+const parsefacts = () => async (context, next) => {
   let { facts } = context.request.body
   if (!facts) facts = context.request.body &&
     context.request.body.fields &&
@@ -98,6 +98,7 @@ const factParser = async context => {
   if (!Array.isArray(facts)) {
     facts = [facts]
   }
+  /*
   if (!facts) {
     context.body = {
       errors: 'No facts provided',
@@ -105,7 +106,9 @@ const factParser = async context => {
     }
     context.status = 400
   }
+  */
   context.livingroom = { facts }
+  await next()
 }
 
 app.use(
@@ -113,9 +116,11 @@ app.use(
     context.body = 'pong'
   })
 )
-app.use(route.post('/assert', factParser, assert))
-app.use(route.post('/select', factParser, select))
-app.use(route.post('/retract', factParser, retract))
+
+app.use(parsefacts())
+app.use(route.post('/assert', assert))
+app.use(route.post('/select', select))
+app.use(route.post('/retract', retract))
 app.use(route.get('/facts', facts))
 app.use(static_('examples'))
 
