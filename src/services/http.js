@@ -5,7 +5,8 @@ module.exports = {
     httpServer.context.client = client
 
     const { makeService } = require('../living-room-services')
-    const service = makeService({name: "living room http", type: 'http'})
+    const hostname =  require('os').hostname()
+    const service = makeService({name: `${hostname} living room http`, type: 'http'})
 
     httpServer.listen(service.port, () => {
       const nbonjour = require('nbonjour').create()

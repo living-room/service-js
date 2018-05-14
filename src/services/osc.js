@@ -75,8 +75,13 @@ module.exports = {
   create: client => {
     const server = new OscServer(client)
     const { makeService } = require('../living-room-services')
-    const service = makeService({name: "living room osc", type: 'osc', protocol: 'udp'})
-    server.listen(service)
-    return service
+    const hostname =  require('os').hostname()
+    try {
+      const service = makeService({name: `${hostname} living room osc`, type: 'osc', protocol: 'udp'})
+      server.listen(service)
+      return service
+    } catch (e) {
+      console.error(`already running living room service with name "${hostname} living room osc", please stop that server first`)
+    }
   }
 }

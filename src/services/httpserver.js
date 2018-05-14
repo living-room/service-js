@@ -18,10 +18,7 @@ const log = () => async (context, next) => {
 }
 
 const assert = async context => {
-  let { facts } = context.request.body
-  if (!Array.isArray(facts)) {
-    facts = [facts]
-  }
+  const { facts } = context.livingroom
   facts.forEach(fact => {
     context.client.assert(fact)
   })
@@ -31,10 +28,7 @@ const assert = async context => {
 }
 
 const retract = async context => {
-  let { facts } = context.request.body
-  if (!Array.isArray(facts)) {
-    facts = [facts]
-  }
+  const { facts } = context.livingroom
   facts.forEach(fact => {
     context.client.retract(fact)
   })
@@ -44,8 +38,7 @@ const retract = async context => {
 }
 
 const select = async context => {
-  let { facts } = context.request.body
-  if (typeof facts === 'string') facts = [facts]
+  let { facts } = context.livingroom
   await context.client.select(...facts).doAll(assertions => {
     context.body = { assertions }
   })
@@ -63,14 +56,32 @@ if (opts.verbose) {
   app.use(log())
 }
 
+const factParser = async context => {
+  let { facts } = context.request.body
+  if (!facts) facts = context.request.body &&
+    context.request.body.fields &&
+    context.request.body.fields.facts
+  if (!Array.isArray(facts)) {
+    facts = [facts]
+  }
+  if (!facts) {
+    context.body = {
+      errors: 'No facts provided',
+      facts: []
+    }
+    context.status = 400
+  }
+  context.livingroom = { facts }
+}
+
 app.use(
   route.get('/ping', async context => {
     context.body = 'pong'
   })
 )
-app.use(route.post('/assert', assert))
-app.use(route.post('/select', select))
-app.use(route.post('/retract', retract))
+app.use(route.post('/assert', factParser, assert))
+app.use(route.post('/select', factParser, select))
+app.use(route.post('/retract', factParser, retract))
 app.use(route.get('/facts', facts))
 app.use(static_('examples'))
 

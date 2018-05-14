@@ -6,10 +6,11 @@ module.exports = {
 
     const { makeService } = require('../living-room-services')
 
-    const services = [makeService({name: 'living room socketio', type: 'http', subtype: 'socketio'})]
+    const hostname =  require('os').hostname()
+    const services = [makeService({name: `${hostname} living room socketio`, type: 'http', subtype: 'socketio'})]
 
     if (app) {
-      services.push(makeService({name: 'living room http', type: 'http'}))
+      services.push(makeService({name: `${hostname} living room http`, type: 'http'}))
     } else {
       const Koa = require('koa')
       app = new Koa()
@@ -73,7 +74,9 @@ module.exports = {
 
     app.listen(services[0].port, async () => {
       const nbonjour = require('nbonjour').create()
-      services.forEach(async service => await nbonjour.publish(service))
+      services.forEach(service => {
+        nbonjour.publish(service)
+      })
     })
 
     return services
