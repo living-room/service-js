@@ -70,7 +70,8 @@ const makeService = ({name, type, protocol, subtype}) => {
   }
 
   const port = parseInt(process.env[`LIVING_ROOM_${type.toUpperCase}_PORT`] || defaults[type])
-  const host = process.env.LIVING_ROOM_NAME || require('os').hostname()
+  const hostname = process.env.LIVING_ROOM_NAME || require('os').hostname()
+  const host = `${hostname}.local`
   const subtypes = ['livingroom']
   if(subtype) subtypes.push(subtype)
   return {type, protocol, port, name, subtypes, host}
