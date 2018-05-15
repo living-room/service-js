@@ -85,7 +85,7 @@ const facts = async context => {
 
 const app = new Koa()
 app.use(cors())
-app.use(body())
+app.use(body({ multipart: true }))
 if (opts.verbose) {
   app.use(log())
 }
