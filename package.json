@@ -1,6 +1,6 @@
 {
   "name": "@living-room/service-js",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "main": "service.js",
   "repository": "git@github.com:living-room/service-js.git",
   "author": "Jonathan Dahan <hi@jonathan.is> (http://jedahan.com)",
@@ -38,6 +38,7 @@
     "minimist": "^1.2.0",
     "nbonjour": "^3.6.1",
     "osc": "^2.2.1",
+    "socket.io-client": "^2.1.1",
     "table": "^4.0.3"
   },
   "devDependencies": {
