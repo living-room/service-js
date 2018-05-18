@@ -1,7 +1,7 @@
 // create(client: Room.Client): Service
 module.exports = {
   create: (client, { app, verbose }) => {
-    const Socket = require('koa-socket')
+    const Socket = require('koa-socket-2')
     const io = new Socket()
 
     const { makeService } = require('../living-room-services')
