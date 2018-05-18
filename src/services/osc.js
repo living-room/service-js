@@ -38,7 +38,7 @@ class OscServer {
     connection.open()
     connection.send({
       address,
-      args: [{ type: 's', value: factString}]
+      args: [{ type: 's', value: factString }]
     })
   }
 
@@ -52,18 +52,21 @@ class OscServer {
       nbonjour.publish(service)
     })
 
-    osc.on('message', ({ address, args }, _, { address: remoteAddress, port: remotePort }) => {
-      const id = `osc://${remoteAddress}:${remotePort}`
+    osc.on(
+      'message',
+      ({ address, args }, _, { address: remoteAddress, port: remotePort }) => {
+        const id = `osc://${remoteAddress}:${remotePort}`
 
-      if (!this.connections.has(id)) {
-        const connection = new UDPPort({ remoteAddress, remotePort })
-        this.connections.set(id, connection)
+        if (!this.connections.has(id)) {
+          const connection = new UDPPort({ remoteAddress, remotePort })
+          this.connections.set(id, connection)
+        }
+
+        const connection = this.connections.get(id)
+        const handle = this.messageHandlers[address]
+        handle({ address, args, connection })
       }
-
-      const connection = this.connections.get(id)
-      const handle = this.messageHandlers[address]
-      handle({ address, args, connection })
-    })
+    )
 
     this.osc = osc
     osc.open()
@@ -75,13 +78,19 @@ module.exports = {
   create: client => {
     const server = new OscServer(client)
     const { makeService } = require('../living-room-services')
-    const hostname =  require('os').hostname()
+    const hostname = require('os').hostname()
     try {
-      const service = makeService({name: `${hostname} living room osc`, type: 'osc', protocol: 'udp'})
+      const service = makeService({
+        name: `${hostname} living room osc`,
+        type: 'osc',
+        protocol: 'udp'
+      })
       server.listen(service)
       return service
     } catch (e) {
-      console.error(`already running living room service with name "${hostname} living room osc", please stop that server first`)
+      console.error(
+        `already running living room service with name "${hostname} living room osc", please stop that server first`
+      )
     }
   }
 }

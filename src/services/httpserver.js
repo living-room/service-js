@@ -92,9 +92,12 @@ if (opts.verbose) {
 
 const parsefacts = () => async (context, next) => {
   let { facts } = context.request.body
-  if (!facts) facts = context.request.body &&
-    context.request.body.fields &&
-    context.request.body.fields.facts
+  if (!facts) {
+    facts =
+      context.request.body &&
+      context.request.body.fields &&
+      context.request.body.fields.facts
+  }
   if (!Array.isArray(facts)) {
     facts = [facts]
   }
