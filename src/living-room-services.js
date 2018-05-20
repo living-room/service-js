@@ -12,10 +12,9 @@ class ServiceManager {
       const {type, protocol, host, port, subtypes, referer} = wut
       const subtype = subtypes.length === 1 ? type : subtypes[subtypes.length - 1]
       this.seen.set(`${subtype} ${type}://${host}:${port}`, up)
-      if (this.drawTimeout) {
-        clearTimeout(this.drawTimeout)
-      }
-      this.drawTimeout = setTimeout(() => this.draw(), 150)
+
+      clearTimeout(this.drawTimeout)
+      this.drawTimeout = setTimeout(() => this.draw(), 1500)
     }
 
     this.browsers = services.map(async service => {

@@ -1,6 +1,6 @@
 {
   "name": "@living-room/service-js",
-  "version": "0.5.6",
+  "version": "0.5.7",
   "main": "service.js",
   "description": "http, eventstream, socketio, and osc server for livingroom",
   "repository": "git@github.com:living-room/service-js.git",
