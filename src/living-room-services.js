@@ -14,7 +14,7 @@ class ServiceManager {
       this.seen.set(`${subtype} ${type}://${host}:${port}`, up)
 
       clearTimeout(this.drawTimeout)
-      this.drawTimeout = setTimeout(() => this.draw(), 1500)
+      this.drawTimeout = setTimeout(() => this.draw(), 2500)
     }
 
     this.browsers = services.map(async service => {
