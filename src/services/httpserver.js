@@ -61,6 +61,17 @@ const retract = async context => {
   context.body = { facts }
 }
 
+const message = async context => {
+  const { facts } = context.livingroom
+  facts.forEach(({assert, retract}) => {
+    assert.forEach(context.client.assert.bind(this))
+    retract.forEach(client.retract.bind(this))
+  })
+  await context.client.flushChanges()
+  context.status = 200
+  context.body = { facts }
+}
+
 const select = async context => {
   let { facts } = context.livingroom
   await context.client.select(...facts).doAll(assertions => {

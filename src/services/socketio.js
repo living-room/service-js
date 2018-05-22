@@ -1,6 +1,6 @@
 // create(client: Room.Client): Service
 module.exports = {
-  create: (client, { app, verbose }) => {
+  create: (client, { app, port=3000, verbose }) => {
     const Socket = require('koa-socket-2')
     const io = new Socket()
 
@@ -9,15 +9,16 @@ module.exports = {
     const hostname = require('os').hostname()
     const services = [
       makeService({
-        name: `${hostname}-living-room-socketio`,
+        name: `${hostname}-${port}-living-room-socketio`,
         type: 'http',
-        subtype: 'socketio'
+        subtype: 'socketio',
+        port
       })
     ]
 
     if (app) {
       services.push(
-        makeService({ name: `${hostname}-living-room-http`, type: 'http' })
+        makeService({ name: `${hostname}-${port}-living-room-http`, type: 'http', port })
       )
     } else {
       const Koa = require('koa')
@@ -42,6 +43,16 @@ module.exports = {
       context.client = client
       context.subscriptions = subscriptions
       await next()
+    })
+
+    io.on('messages', async ({ client, data: facts, acknowledge }) => {
+      if (!Array.isArray(facts)) facts = [facts]
+      facts.forEach(fact => {
+        if (fact.assert) client.assert(fact.assert)
+        if (fact.retract) client.retract(fact.retract)
+      })
+      await client.flushChanges()
+      if (acknowledge) acknowledge(facts)
     })
 
     io.on('assert', async ({ client, data: facts, acknowledge }) => {

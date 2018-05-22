@@ -75,15 +75,16 @@ class OscServer {
 
 // create(client: Room.Client): Service
 module.exports = {
-  create: client => {
+  create: (client, { port=41234 }) => {
     const server = new OscServer(client)
     const { makeService } = require('../living-room-services')
     const hostname = require('os').hostname()
     try {
       const service = makeService({
-        name: `${hostname} living room osc`,
+        name: `${hostname}-${port}-living-room-osc`,
         type: 'osc',
-        protocol: 'udp'
+        protocol: 'udp',
+        port
       })
       server.listen(service)
       return service
