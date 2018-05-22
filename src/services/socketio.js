@@ -64,7 +64,7 @@ module.exports = class SocketIOService extends HttpService {
     io.attach(this.app)
   }
 
-  listen() {
+  async listen() {
     super.broadcast()
     const { port } = this.options
     const hostname = require('os').hostname()
@@ -77,7 +77,8 @@ module.exports = class SocketIOService extends HttpService {
 
     const nbonjour = require('nbonjour').create()
     this._services.push(service)
-    this.app.listen(port)
+    const app = await this.app.listen(port)
     nbonjour.publish(service)
+    return app
   }
 }

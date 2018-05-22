@@ -38,8 +38,8 @@ module.exports = class HttpService {
 
     app.use(cors())
     app.use(body({ multipart: true }))
-    app.use(log())
-        
+    if (options.verbose) app.use(log())
+
     app.use(parsefacts())
 
     app.use(route.post('/assert', async context => {
@@ -66,7 +66,7 @@ module.exports = class HttpService {
         context.req.on('close,finish,error', () => {
           stream.end()
         })
-    
+
         context.type = 'text/event-stream'
         context.body = stream
         return
@@ -120,6 +120,6 @@ module.exports = class HttpService {
 
   listen() {
     this.broadcast()
-    this.app.listen(this.options.port)
+    return this.app.listen(this.options.port)
   }
 }

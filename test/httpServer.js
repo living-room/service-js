@@ -3,37 +3,40 @@ const Database = require('@living-room/database-js')
 const room = new Database()
 const HttpService = require('../src/services/http')
 const request = require('supertest')
+const pickPort = require('pick-port')
 
 const gorogInitial = `#gorog is a barbarian at 40, 50`
 const gorogMoves = `#gorog is a barbarian at 99, 11`
 
-const createApp = () => {
-  const httpService = new HttpService({
-    room: database.client('http')
-  })
-  httpService.listen()
-  return httpService.app
-}
+test.beforeEach(async t => {
+  const database = new Database()
+  const room = database.client('http')
+  const port = await pickPort({type: 'tcp'})
+  const httpService = new HttpService({ room, port })
+  t.context.app = await httpService.listen()
+})
+
+test.afterEach(async t => {
+  t.context.app.close()
+})
 
 test('assert adds to the log', async t => {
-  const app = createApp()
+  const { app } = t.context
   await request(app).post('/assert').send({ facts: gorogInitial }).expect(200)
   const facts = await request(app).get('/facts')
   t.deepEqual(facts.body, {assertions: [ gorogInitial ]})
 })
 
 test('retract removes from the log', async t => {
-  const app = createApp()
+  const { app } = t.context
   await request(app).post('/assert').send({ facts: gorogInitial }).expect(200)
   await request(app).post('/retract').send({ facts: '#gorog is a barbarian at $x, $y' }).expect(200)
   const facts = await request(app).get('/facts')
   t.deepEqual(facts.body, {assertions: [ ]})
 })
 
-test.todo('retracts and asserts batch correctly')
-
 test('select grabs the right fact', async t => {
-  const app = createApp()
+  const { app } = t.context
   await request(app).post('/assert').send({ facts: gorogInitial }).expect(200)
   await request(app).post('/retract').send({ facts: gorogInitial }).expect(200)
   await request(app).post('/assert').send({ facts: gorogMoves }).expect(200)
@@ -42,7 +45,7 @@ test('select grabs the right fact', async t => {
   t.deepEqual(facts.body, {assertions: [ gorogMoves ]})
 
   const res = await request(app).post('/select').send({ facts: ['$name is a $what at $x, $y'] })
-  const [{name, what, x, y}] = res.body.assertions
+  const [{name, what, x, y}] = res.body
   t.is(name.id, 'gorog')
   t.is(what.word, 'barbarian')
   t.is(x.value, 99)
