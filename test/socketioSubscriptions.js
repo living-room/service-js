@@ -5,10 +5,11 @@ test.beforeEach(t => {
   const Database = require('@living-room/database-js')
   const room = new Database()
 
-  const socketService = require('../src/services/socketio').create(
-    room.client('socket'),
-    { app: require('../src/services/httpserver'), verbose: false }
-  )
+  const SocketIOService = require('../src/services/socketio')
+  const socketservice = new SocketIOService({
+    room: room.client('socket'),
+    verbose: false
+  })
   t.context.timesChanged = 0
 })
 

@@ -1,35 +1,34 @@
 const Database = require('@living-room/database-js')
 const room = new Database()
 const pickPort = require('pick-port')
-const socketio = require('./src/services/socketio')
-const osc = require('./src/services/osc')
+
+const SocketIOService = require('./src/services/socketio')
+const OscService = require('./src/services/osc')
+const { ServiceManager } = require('./src/manager')
 
 module.exports = {
-  async listen(port, oscport, cb) {
-    port = port || await pickPort({type: 'tcp'})
-    oscport = oscport || await pickPort()
+  async listen(port, oscport) {
+    const client = room.client('socketio')
 
-    const socketioClient = room.client('socketio')
-    const socketioOptions = {
-      app: require('./src/services/httpserver'),
-      port,
-      verbose: false
-    }
-    const socketioService = socketio.create(socketioClient, socketioOptions)
+    const socketio = new SocketIOService({
+      room: client,
+      verbose: false,
+      port: port || await pickPort({type: 'tcp'})
+    })
 
-    const oscClient = room.client('osc')
-    const oscOptions = { oscport }
-    const oscService = osc.create(oscClient, oscOptions)
-
-    const { ServiceManager } = require('./src/living-room-services')
-    const manager = new ServiceManager(...socketioService, oscService)
+    const osc = new OscService({
+      room: client,
+      port: oscport || await pickPort()
+    })
+    
+    socketio.listen()
+    osc.listen()
+    const manager = new ServiceManager(...socketio._services, ...osc._services)
 
     process.on('SIGINT', () => {
       console.log()
       console.log(`see you later, space surfer...`)
       process.exit(0)
     })
-
-    return { port, oscport }
   }
 }
