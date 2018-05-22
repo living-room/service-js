@@ -1,33 +1,41 @@
-class OscServer {
-  constructor (client) {
-    this.client = client
+const { makeService } = require('../manager')
+
+module.exports = class OscService {
+  constructor ({ port, verbose, room }) {
+    this.verbose = verbose
+    this.port = port
+    this._services = []
     this.connections = new Map()
     this.messageHandlers = {
-      '/echo': ({ connection, args }) => {
-        this.send(connection, '/echo', args)
+      '/messages': ({ args }) => {
+        args.forEach(message => {
+          if (message.assert) room.assert(message.assert)
+          if (message.retract) room.retract(message.retract)
+        })
+        room.flushChanges()
       },
       '/assert': ({ args }) => {
         args.forEach(fact => {
-          this.client.assert(fact)
+          room.assert(fact)
         })
-        this.client.flushChanges()
+        room.flushChanges()
       },
       '/retract': ({ args }) => {
         args.forEach(fact => {
-          this.client.retract(fact)
+          room.retract(fact)
         })
-        this.client.flushChanges()
+        room.flushChanges()
       },
       '/select': ({ connection, args }) => {
         const facts = args.splice(1)
         connection.options.remotePort = parseInt(args[0])
 
-        this.client.select(...facts).doAll(assertions => {
+        room.select(...facts).doAll(assertions => {
           this.send(connection, '/assertions', JSON.stringify(assertions))
         })
       },
       '/subscribe': ({ connection, args }) => {
-        this.client.subscribe({ facts: args }).then(() => {
+        room.subscribe({ facts: args }).then(() => {
           this.send(connection, '/subscriptions', JSON.stringify(args))
         })
       }
@@ -42,14 +50,27 @@ class OscServer {
     })
   }
 
-  listen (service, localAddress = '0.0.0.0') {
+  listen () {
     const { UDPPort } = require('osc')
-    const osc = new UDPPort({ localAddress, localPort: service.port })
+    const port = this.port
+
+    const osc = new UDPPort({
+      localAddress: '0.0.0.0',
+      localPort: port
+    })
+
+    const hostname = require('os').hostname()
+    const nbonjour = require('nbonjour').create()
+    const service = makeService({
+      name: `${hostname}-${port}-living-room-osc`,
+      type: 'osc',
+      protocol: 'udp',
+      port
+    })
+    this._services = [service]
 
     osc.on(`ready`, () => {
-      const name = process.env.LIVING_ROOM_NAME || require('os').hostname()
-      const nbonjour = require('nbonjour').create()
-      nbonjour.publish(service)
+      nbonjour.publish(this._services[0])
     })
 
     osc.on(
@@ -62,6 +83,8 @@ class OscServer {
           this.connections.set(id, connection)
         }
 
+        if (this.verbose) console.dir(address, args)
+
         const connection = this.connections.get(id)
         const handle = this.messageHandlers[address]
         handle({ address, args, connection })
@@ -70,27 +93,5 @@ class OscServer {
 
     this.osc = osc
     osc.open()
-  }
-}
-
-// create(client: Room.Client): Service
-module.exports = {
-  create: client => {
-    const server = new OscServer(client)
-    const { makeService } = require('../living-room-services')
-    const hostname = require('os').hostname()
-    try {
-      const service = makeService({
-        name: `${hostname} living room osc`,
-        type: 'osc',
-        protocol: 'udp'
-      })
-      server.listen(service)
-      return service
-    } catch (e) {
-      console.error(
-        `already running living room service with name "${hostname} living room osc", please stop that server first`
-      )
-    }
   }
 }

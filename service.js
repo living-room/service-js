@@ -1,41 +1,59 @@
 const Database = require('@living-room/database-js')
 const room = new Database()
-const chalk = require('chalk').default
-const boxen = require('boxen')
+const pickPort = require('pick-port')
 
-const app = require('./src/services/httpserver')
+const SocketIOService = require('./src/services/socketio')
+const OscService = require('./src/services/osc')
+const { ServiceManager } = require('./src/manager')
 
-const socketService = require('./src/services/socketio').create(
-  room.client('socket'),
-  { app, verbose: false }
-)
+class LivingRoomService {
+  constructor ({ verbose, port, oscport } = { verbose: false }) {
+    this.verbose = verbose
+    this.port = port
+    this.oscport = oscport
+    this.room = room.client('socketio')
+  }
 
-const oscService = require('./src/services/osc').create(room.client('osc'))
+  async listen ({ verbose } = { verbose: true }) {
+    this.port = this.port || (await pickPort({ type: 'tcp' }))
+    this.oscport = this.oscport || (await pickPort())
 
-const { ServiceManager } = require('./src/living-room-services')
-const manager = new ServiceManager(...socketService, oscService)
+    this.socketio = new SocketIOService({
+      room: this.room,
+      port: this.port,
+      verbose: this.verbose
+    })
 
-process.on('uncaughtException', error => {
-  if (error.errno !== 'EADDRINUSE') return
-  const findProcess = require('find-process')
-  findProcess('port', error.port).then(list => {
-    const message =
-      chalk.keyword('hotpink')(
-        `Another server is listening on port ${
-          error.port
-        },\nplease stop it with `
-      ) + chalk.red(`kill ${list[0].pid}`)
-    const formatting = {
-      padding: 1,
-      float: 'center'
-    }
-    console.error(boxen(message, formatting))
-    process.exit(0)
-  })
-})
+    this.osc = new OscService({
+      room: this.room,
+      port: this.oscport,
+      verbose: this.verbose
+    })
+    this.socketioapp = this.socketio.listen()
+    this.oscapp = this.osc.listen()
+    this.manager = new ServiceManager({
+      verbose,
+      services: [...this.socketio._services, ...this.osc._services]
+    })
 
-process.on('SIGINT', () => {
-  console.log()
-  console.log(`see you later, space surfer...`)
-  process.exit(0)
-})
+    process.on('SIGINT', () => {
+      console.log()
+      console.log(`see you later, space surfer...`)
+      process.exit(0)
+    })
+
+    return { port: this.port, oscport: this.oscport }
+  }
+
+  close () {
+    this.manager.close()
+  }
+}
+
+const listen = () => {
+  const service = new LivingRoomService()
+  service.listen()
+  return service
+}
+
+module.exports = { listen, LivingRoomService }

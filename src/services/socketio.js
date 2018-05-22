@@ -1,92 +1,83 @@
-// create(client: Room.Client): Service
-module.exports = {
-  create: (client, { app, verbose }) => {
-    const Socket = require('koa-socket-2')
+const Socket = require('koa-socket-2')
+const { makeService } = require('../manager')
+const hostname = require('os').hostname()
+const HttpService = require('./http')
+const util = require('util')
+
+module.exports = class SocketIOService extends HttpService {
+  constructor ({ room, port, verbose }) {
+    super({ room, port, verbose })
+    this.room = this.room || room
+    this.port = this.port || port
+
     const io = new Socket()
-
-    const { makeService } = require('../living-room-services')
-
-    const hostname = require('os').hostname()
-    const services = [
-      makeService({
-        name: `${hostname}-living-room-socketio`,
-        type: 'http',
-        subtype: 'socketio'
-      })
-    ]
-
-    if (app) {
-      services.push(
-        makeService({ name: `${hostname}-living-room-http`, type: 'http' })
-      )
-    } else {
-      const Koa = require('koa')
-      app = new Koa()
-    }
-
-    io.attach(app)
-
-    app.context.client = app.context.client || client
+    io.attach(this.app)
 
     if (verbose) {
       io.use(async (context, next) => {
-        console.log(`<- ${context.event} ${context.data}`)
+        const requestBody = util.inspect(context.data)
+        console.log(`<- ${context.event} ${requestBody}`)
         await next()
-        console.log(`<- ${context.event} ${context.data}`)
+        const responseBody = util.inspect(context.data)
+        console.log(`<- ${context.event} ${responseBody}`)
       })
     }
 
     const subscriptions = new Set()
 
     io.use(async (context, next) => {
-      context.client = client
       context.subscriptions = subscriptions
       await next()
     })
 
-    io.on('assert', async ({ client, data: facts, acknowledge }) => {
-      if (!Array.isArray(facts)) facts = [facts]
-      facts.forEach(fact => client.assert(fact))
-      await client.flushChanges()
+    io.on('messages', async ({ data: facts, acknowledge }) => {
+      this.message(facts)
       if (acknowledge) acknowledge(facts)
     })
 
-    io.on('retract', async ({ client, data: facts, acknowledge }) => {
-      if (!Array.isArray(facts)) facts = [facts]
-      facts.forEach(fact => client.retract(fact))
-      await client.flushChanges()
+    io.on('assert', async ({ data: facts, acknowledge }) => {
+      this.assert(facts)
       if (acknowledge) acknowledge(facts)
     })
 
-    io.on('select', async ({ data: facts, client, acknowledge }) => {
-      await client.select(facts).doAll(acknowledge)
+    io.on('retract', async ({ data: facts, acknowledge }) => {
+      this.retract(facts)
+      if (acknowledge) acknowledge(facts)
+    })
+
+    io.on('select', async ({ data: facts, acknowledge }) => {
+      this.select(facts)
+      if (acknowledge) acknowledge(facts)
     })
 
     io.on(
       'subscribe',
-      async ({
-        data: patternsString,
-        socket,
-        client,
-        subscriptions,
-        acknowledge
-      }) => {
+      async ({ data: patternsString, socket, subscriptions, acknowledge }) => {
         const patterns = JSON.parse(patternsString)
-        const subscription = client.subscribe(patterns, changes => {
+        const subscription = room.subscribe(patterns, changes => {
           socket.emit(patternsString, changes)
         })
         subscriptions.add(subscription)
         if (acknowledge) acknowledge(subscription)
       }
     )
+  }
 
-    app.listen(services[0].port, async () => {
-      const nbonjour = require('nbonjour').create()
-      services.forEach(service => {
-        nbonjour.publish(service)
-      })
+  async listen () {
+    super.broadcast()
+    const port = this.port
+    const hostname = require('os').hostname()
+    const service = makeService({
+      name: `${hostname}-${port}-living-room-socketio`,
+      type: 'http',
+      subtype: 'socketio',
+      port
     })
 
-    return services
+    const nbonjour = require('nbonjour').create()
+    this._services.push(service)
+    const app = await this.app.listen(port)
+    nbonjour.publish(service)
+    return app
   }
 }
