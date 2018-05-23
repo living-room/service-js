@@ -30,7 +30,7 @@ const log = () => async (context, next) => {
 }
 
 module.exports = class HttpService {
-  constructor(options) {
+  constructor (options) {
     this.options = options
     this.room = options.room
     this._services = []
@@ -42,49 +42,61 @@ module.exports = class HttpService {
 
     app.use(parsefacts())
 
-    app.use(route.post('/assert', async context => {
-      this.assert(context.body.facts)
-    }))
-
-    app.use(route.post('/retract', async context => {
-      this.retract(context.body.facts)
-    }))
-
-    app.use(route.post('/', async context => {
-      this.message(context.body.facts)
-    }))
-
-    app.use(route.post('/select', async context => {
-      await this.select(context.body.facts).doAll(assertions => {
-        context.body = assertions
+    app.use(
+      route.post('/assert', async context => {
+        this.assert(context.body.facts)
       })
-    }))
+    )
 
-    app.use(route.get('/facts', async context => {
-      if (context.accepts('json', 'text/event-stream') == 'text/event-stream') {
-        let stream = new DBStream(this.room)
-        context.req.on('close,finish,error', () => {
-          stream.end()
+    app.use(
+      route.post('/retract', async context => {
+        this.retract(context.body.facts)
+      })
+    )
+
+    app.use(
+      route.post('/', async context => {
+        this.message(context.body.facts)
+      })
+    )
+
+    app.use(
+      route.post('/select', async context => {
+        await this.select(context.body.facts).doAll(assertions => {
+          context.body = assertions
         })
+      })
+    )
 
-        context.type = 'text/event-stream'
-        context.body = stream
-        return
-      }
-      const assertions = await this.facts()
-      context.body = { assertions }
-    }))
+    app.use(
+      route.get('/facts', async context => {
+        if (
+          context.accepts('json', 'text/event-stream') == 'text/event-stream'
+        ) {
+          let stream = new DBStream(this.room)
+          context.req.on('close,finish,error', () => {
+            stream.end()
+          })
+
+          context.type = 'text/event-stream'
+          context.body = stream
+          return
+        }
+        const assertions = await this.facts()
+        context.body = { assertions }
+      })
+    )
 
     app.use(static_('examples'))
     this.app = app
   }
 
-  async assert(facts) {
+  async assert (facts) {
     facts.forEach(fact => this.room.assert(fact))
     await this.room.flushChanges()
   }
 
-  async retract(facts) {
+  async retract (facts) {
     facts.forEach(fact => this.room.retract(fact))
     await this.room.flushChanges()
   }
@@ -105,7 +117,7 @@ module.exports = class HttpService {
     return await this.room.getAllFacts()
   }
 
-  broadcast() {
+  broadcast () {
     const { port } = this.options
     const hostname = require('os').hostname()
     const nbonjour = require('nbonjour').create()
@@ -118,7 +130,7 @@ module.exports = class HttpService {
     nbonjour.publish(service)
   }
 
-  listen() {
+  listen () {
     this.broadcast()
     return this.app.listen(this.options.port)
   }

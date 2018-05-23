@@ -45,7 +45,7 @@ module.exports = class OscService {
       args: [{ type: 's', value: factString }]
     })
   }
-  
+
   listen () {
     const { UDPPort } = require('osc')
     const { port } = this.options
