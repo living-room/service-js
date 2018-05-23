@@ -6,27 +6,32 @@ const SocketIOService = require('./src/services/socketio')
 const OscService = require('./src/services/osc')
 const { ServiceManager } = require('./src/manager')
 
-module.exports = {
-  listen: async ({verbose, port, oscport}={verbose: false}) => {
-    const client = room.client('socketio')
-    port = port || (await pickPort({ type: 'tcp' }))
-    oscport = oscport || (await pickPort())
+class LivingRoomService {
+  constructor({verbose, port, oscport}={verbose: false}) {
+    this.verbose = verbose
+    this.port = port
+    this.oscport = oscport
+    this.room = room.client('socketio')
+  }
 
-    const socketio = new SocketIOService({
-      room: client,
-      port,
-      verbose
+  async listen({verbose}={verbose: true}) {
+    this.port = this.port || (await pickPort({ type: 'tcp' }))
+    this.oscport = this.oscport || (await pickPort())
+
+    this.socketio = new SocketIOService({
+      room: this.room,
+      port: this.port,
+      verbose: this.verbose
     })
 
-    const osc = new OscService({
-      room: client,
-      port: oscport,
-      verbose
+    this.osc = new OscService({
+      room: this.room,
+      port: this.oscport,
+      verbose: this.verbose
     })
-
-    const socketioapp = socketio.listen()
-    const oscapp = osc.listen()
-    const manager = new ServiceManager(...socketio._services, ...osc._services)
+    this.socketioapp = this.socketio.listen()
+    this.oscapp = this.osc.listen()
+    this.manager = new ServiceManager({verbose, services: [...this.socketio._services, ...this.osc._services]})
 
     process.on('SIGINT', () => {
       console.log()
@@ -34,9 +39,18 @@ module.exports = {
       process.exit(0)
     })
 
-    return {
-      port,
-      oscport
-    }
+    return { port: this.port, oscport: this.oscport }
+  }
+
+  close() {
+    this.manager.close()
   }
 }
+
+const listen = () => {
+  const service = new LivingRoomService()
+  service.listen()
+  return service
+}
+
+module.exports = { listen, LivingRoomService }
