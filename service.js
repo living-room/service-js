@@ -7,22 +7,25 @@ const OscService = require('./src/services/osc')
 const { ServiceManager } = require('./src/manager')
 
 module.exports = {
-  async listen (port, oscport) {
+  listen: async ({verbose, port, oscport}={verbose: false}) => {
     const client = room.client('socketio')
+    port = port || (await pickPort({ type: 'tcp' }))
+    oscport = oscport || (await pickPort())
 
     const socketio = new SocketIOService({
       room: client,
-      verbose: false,
-      port: port || (await pickPort({ type: 'tcp' }))
+      port,
+      verbose
     })
 
     const osc = new OscService({
       room: client,
-      port: oscport || (await pickPort())
+      port: oscport,
+      verbose
     })
 
-    socketio.listen()
-    osc.listen()
+    const socketioapp = socketio.listen()
+    const oscapp = osc.listen()
     const manager = new ServiceManager(...socketio._services, ...osc._services)
 
     process.on('SIGINT', () => {
@@ -30,5 +33,10 @@ module.exports = {
       console.log(`see you later, space surfer...`)
       process.exit(0)
     })
+
+    return {
+      port,
+      oscport
+    }
   }
 }

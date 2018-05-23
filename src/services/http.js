@@ -55,7 +55,7 @@ module.exports = class HttpService {
     )
 
     app.use(
-      route.post('/', async context => {
+      route.post('/messages', async context => {
         this.message(context.body.facts)
       })
     )

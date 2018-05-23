@@ -7,8 +7,12 @@ module.exports = class OscService {
     this._services = []
     this.connections = new Map()
     this.messageHandlers = {
-      '/echo': ({ connection, args }) => {
-        this.send(connection, '/echo', args)
+      '/messages': ({ args }) => {
+        args.forEach(message => {
+          if (message.assert) this.room.assert(message.assert)
+          if (message.retract) this.room.retract(message.retract)
+        })
+        this.room.flushChanges()
       },
       '/assert': ({ args }) => {
         args.forEach(fact => {
@@ -78,6 +82,8 @@ module.exports = class OscService {
           const connection = new UDPPort({ remoteAddress, remotePort })
           this.connections.set(id, connection)
         }
+
+        if (this.options.verbose) console.dir(address, args)
 
         const connection = this.connections.get(id)
         const handle = this.messageHandlers[address]
