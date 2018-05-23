@@ -7,14 +7,14 @@ const OscService = require('./src/services/osc')
 const { ServiceManager } = require('./src/manager')
 
 class LivingRoomService {
-  constructor({verbose, port, oscport}={verbose: false}) {
+  constructor ({ verbose, port, oscport } = { verbose: false }) {
     this.verbose = verbose
     this.port = port
     this.oscport = oscport
     this.room = room.client('socketio')
   }
 
-  async listen({verbose}={verbose: true}) {
+  async listen ({ verbose } = { verbose: true }) {
     this.port = this.port || (await pickPort({ type: 'tcp' }))
     this.oscport = this.oscport || (await pickPort())
 
@@ -31,7 +31,10 @@ class LivingRoomService {
     })
     this.socketioapp = this.socketio.listen()
     this.oscapp = this.osc.listen()
-    this.manager = new ServiceManager({verbose, services: [...this.socketio._services, ...this.osc._services]})
+    this.manager = new ServiceManager({
+      verbose,
+      services: [...this.socketio._services, ...this.osc._services]
+    })
 
     process.on('SIGINT', () => {
       console.log()
@@ -42,7 +45,7 @@ class LivingRoomService {
     return { port: this.port, oscport: this.oscport }
   }
 
-  close() {
+  close () {
     this.manager.close()
   }
 }
