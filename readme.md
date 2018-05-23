@@ -100,26 +100,27 @@ void mousePressed() {
 }
 ```
 
-# api
+## api
 
-## HTTP
-
-### POST /assert `facts=['some', 'facts', 'here']`
+The http, socketio, and osc endpoints are all the same
+HTTP uses POST unless otherwise stated.
 
 Add some facts
 
-### POST /retract `facts=['some', 'facts', 'here']`
+    /assert facts=['some', 'facts', 'here']
 
 Remove some facts
 
-### POST / `facts=[{assert: 'some'}, {retract: 'facts'}, {assert: 'here'}]`
+    /retract facts=['some', 'facts', 'here']
 
 Batch add and remove facts from the database
 
-### POST /select `facts='$what'`
+    / facts=[{assert: 'some'}, {retract: 'facts'}, {assert: 'here'}]
 
 Find some facts that match a pattern
 
-### GET /facts
+    /select `facts='$what'`
 
 Get all the facts
+
+    GET /facts
