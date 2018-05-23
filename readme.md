@@ -12,10 +12,9 @@ For a nice javascript client, check out https://github.com/living-room/client-js
 
 ## installing
 
-```shell
-npm install
-npm start
-```
+    npm install
+    npm start
+    npm test
 
 ## example http
 
