@@ -2,25 +2,20 @@
 
 <img src="./images/npmstart.png" width="345" align="right" />
 
-Creates a living room that you can connect to over HTTP, socket.io, and osc!
+Creates a living room that you can connect to over HTTP, eventstreams, socket.io, and osc!
 
 You can test it out by running `npm start` after installing the dependencies with `npm install`
 
-For motivations, context, and philosophy, check out https://github.com/living-room/living-room
+For a better example with more context, processes and displays, see https://github.com/living-room/lovelace
 
 For a nice javascript client, check out https://github.com/living-room/client-js
 
 ## installing
 
-There is a git [post-receive hook](./hooks/post-receive) which we setup like so:
-
-    # on remote machine
-    git clone --bare https://github.com/living-room/service-js.git service-js.git
-    mkdir service-js
-    # on local machine
-    git remote add my-remote-machine ssh://my-remote-machine/home/livingroom/service-js.git
-
-After deploying the default branch, the post-receive hook checks it out and restarts the system service. neat.
+```shell
+npm install
+npm start
+```
 
 ## example http
 
@@ -71,11 +66,6 @@ setInterval(() => {
 from [examples/osc/osc.pde](examples/osc/osc.pde)
 
 ```processing
-/**
- * based off of oscP5message by andreas schlegel
- * oscP5 website at http://www.sojamo.de/oscP5
- */
-
 import oscP5.*;
 import netP5.*;
 
@@ -109,3 +99,27 @@ void mousePressed() {
   oscP5.send(selectMessage, myRemoteLocation);
 }
 ```
+
+# api
+
+## HTTP
+
+### POST /assert `facts=['some', 'facts', 'here']`
+
+Add some facts
+
+### POST /retract `facts=['some', 'facts', 'here']`
+
+Remove some facts
+
+### POST / `facts=[{assert: 'some'}, {retract: 'facts'}, {assert: 'here'}]`
+
+Batch add and remove facts from the database
+
+### POST /select `facts='$what'`
+
+Find some facts that match a pattern
+
+### GET /facts
+
+Get all the facts
