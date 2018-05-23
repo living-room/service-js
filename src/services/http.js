@@ -26,7 +26,7 @@ const log = () => async (context, next) => {
   console.log(`<- ${context.url} ${requestBody}`)
   await next()
   const responseBody = util.inspect(context.body)
-  console.log(`-> ${context.url} ${responseBody}`)
+  console.log(`-> ${context.url} ${requestBody}`)
 }
 
 module.exports = class HttpService {

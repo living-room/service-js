@@ -2,17 +2,21 @@ const Socket = require('koa-socket-2')
 const { makeService } = require('../manager')
 const hostname = require('os').hostname()
 const HttpService = require('./http')
+const util = require('util')
 
 module.exports = class SocketIOService extends HttpService {
   constructor ({ room, port, verbose }) {
     super({ room, port, verbose })
     const io = new Socket()
+    io.attach(this.app)
 
     if (verbose) {
       io.use(async (context, next) => {
-        console.log(`<- ${context.event} ${context.data}`)
+        const requestBody = util.inspect(context.data)
+        console.log(`<- ${context.event} ${requestBody}`)
         await next()
-        console.log(`<- ${context.event} ${context.data}`)
+        const responseBody = util.inspect(context.data)
+        console.log(`<- ${context.event} ${responseBody}`)
       })
     }
 
@@ -61,7 +65,6 @@ module.exports = class SocketIOService extends HttpService {
         if (acknowledge) acknowledge(subscription)
       }
     )
-    io.attach(this.app)
   }
 
   async listen () {
