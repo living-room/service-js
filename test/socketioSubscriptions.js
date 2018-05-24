@@ -27,15 +27,13 @@ test.cb('subscriptions in browser', t => {
 
   const initialselections = JSON.stringify(['$name is at $x, $y'])
 
-  socket.on(initialselections, ({assertions, retractions}) => {
+  socket.on(initialselections, data => {
     if (t.context.timesChanged === 0) {
-      t.deepEqual([gorogstartparsed], assertions, "asserted:gorogstart:previousassertions")
-      t.deepEqual([], retractions, "asserted:gorogstart:previousretractions")
+      t.deepEqual([gorogstartparsed], data, "asserted:gorogstart:previousassertions")
       t.end()
       // FIXME: this never gets called...
     } else if (t.context.timesChanged === 1) {
-      t.deepEqual([gorogmoveparsed], assertions, "asserted:gorogmove:assertions")
-      t.deepEqual([], retractions, "asserted:gorogmove:retractions")
+      t.deepEqual([gorogmoveparsed], data, "asserted:gorogmove:assertions")
     }
     t.context.timesChanged++
   })
