@@ -1,41 +1,41 @@
 const { makeService } = require('../manager')
 
 module.exports = class OscService {
-  constructor (options) {
-    this.options = options
-    this.room = options.room
+  constructor ({ port, verbose, room }) {
+    this.verbose = verbose
+    this.port = port
     this._services = []
     this.connections = new Map()
     this.messageHandlers = {
       '/messages': ({ args }) => {
         args.forEach(message => {
-          if (message.assert) this.room.assert(message.assert)
-          if (message.retract) this.room.retract(message.retract)
+          if (message.assert) room.assert(message.assert)
+          if (message.retract) room.retract(message.retract)
         })
-        this.room.flushChanges()
+        room.flushChanges()
       },
       '/assert': ({ args }) => {
         args.forEach(fact => {
-          this.room.assert(fact)
+          room.assert(fact)
         })
-        this.room.flushChanges()
+        room.flushChanges()
       },
       '/retract': ({ args }) => {
         args.forEach(fact => {
-          this.room.retract(fact)
+          room.retract(fact)
         })
-        this.room.flushChanges()
+        room.flushChanges()
       },
       '/select': ({ connection, args }) => {
         const facts = args.splice(1)
         connection.options.remotePort = parseInt(args[0])
 
-        this.room.select(...facts).doAll(assertions => {
+        room.select(...facts).doAll(assertions => {
           this.send(connection, '/assertions', JSON.stringify(assertions))
         })
       },
       '/subscribe': ({ connection, args }) => {
-        this.room.subscribe({ facts: args }).then(() => {
+        room.subscribe({ facts: args }).then(() => {
           this.send(connection, '/subscriptions', JSON.stringify(args))
         })
       }
@@ -52,7 +52,7 @@ module.exports = class OscService {
 
   listen () {
     const { UDPPort } = require('osc')
-    const { port } = this.options
+    const port = this.port
 
     const osc = new UDPPort({
       localAddress: '0.0.0.0',
@@ -83,7 +83,7 @@ module.exports = class OscService {
           this.connections.set(id, connection)
         }
 
-        if (this.options.verbose) console.dir(address, args)
+        if (this.verbose) console.dir(address, args)
 
         const connection = this.connections.get(id)
         const handle = this.messageHandlers[address]

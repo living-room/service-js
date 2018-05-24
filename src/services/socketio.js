@@ -7,6 +7,9 @@ const util = require('util')
 module.exports = class SocketIOService extends HttpService {
   constructor ({ room, port, verbose }) {
     super({ room, port, verbose })
+    this.room = this.room || room
+    this.port = this.port || port
+
     const io = new Socket()
     io.attach(this.app)
 
@@ -23,42 +26,35 @@ module.exports = class SocketIOService extends HttpService {
     const subscriptions = new Set()
 
     io.use(async (context, next) => {
-      context.client = this.room
       context.subscriptions = subscriptions
       await next()
     })
 
-    io.on('messages', async ({ client, data: facts, acknowledge }) => {
+    io.on('messages', async ({ data: facts, acknowledge }) => {
       this.message(facts)
       if (acknowledge) acknowledge(facts)
     })
 
-    io.on('assert', async ({ client, data: facts, acknowledge }) => {
+    io.on('assert', async ({ data: facts, acknowledge }) => {
       this.assert(facts)
       if (acknowledge) acknowledge(facts)
     })
 
-    io.on('retract', async ({ client, data: facts, acknowledge }) => {
+    io.on('retract', async ({ data: facts, acknowledge }) => {
       this.retract(facts)
       if (acknowledge) acknowledge(facts)
     })
 
-    io.on('select', async ({ data: facts, client, acknowledge }) => {
+    io.on('select', async ({ data: facts, acknowledge }) => {
       this.select(facts)
       if (acknowledge) acknowledge(facts)
     })
 
     io.on(
       'subscribe',
-      async ({
-        data: patternsString,
-        socket,
-        client,
-        subscriptions,
-        acknowledge
-      }) => {
+      async ({ data: patternsString, socket, subscriptions, acknowledge }) => {
         const patterns = JSON.parse(patternsString)
-        const subscription = client.subscribe(patterns, changes => {
+        const subscription = room.subscribe(patterns, changes => {
           socket.emit(patternsString, changes)
         })
         subscriptions.add(subscription)
@@ -69,7 +65,7 @@ module.exports = class SocketIOService extends HttpService {
 
   async listen () {
     super.broadcast()
-    const { port } = this.options
+    const port = this.port
     const hostname = require('os').hostname()
     const service = makeService({
       name: `${hostname}-${port}-living-room-socketio`,

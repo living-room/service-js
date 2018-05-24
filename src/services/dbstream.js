@@ -1,7 +1,7 @@
 const { Readable } = require('stream')
 
 module.exports = class DBStream extends Readable {
-  constructor (client) {
+  constructor (room) {
     let assertCb = fact => {
       this.push(`event:assert\ndata:${fact}\n\n`)
     }
@@ -11,13 +11,13 @@ module.exports = class DBStream extends Readable {
 
     super({
       destroy: () => {
-        client.off('assert', assertCb)
-        client.off('retract', retractCb)
+        room.off('assert', assertCb)
+        room.off('retract', retractCb)
       }
     })
 
-    client.on('assert', assertCb)
-    client.on('retract', retractCb)
+    room.on('assert', assertCb)
+    room.on('retract', retractCb)
   }
 
   _read () {}
