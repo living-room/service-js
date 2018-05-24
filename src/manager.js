@@ -3,7 +3,7 @@ const chalk = require('chalk').default
 const nbonjour = require('nbonjour').create()
 
 class ServiceManager {
-  constructor(...services) {
+  constructor({services, verbose}={verbose: true}) {
     // seen: Map<url: String, up: bool>
     this.seen = new Map()
     this.drawTimeout = null
@@ -19,9 +19,11 @@ class ServiceManager {
 
     this.browsers = services.map(async service => {
       const browser = nbonjour.find(service)
-      browser.on('up', updateAndDraw(true))
-      browser.on('down', updateAndDraw(false))
-      browser.start()
+      if (verbose) {
+        browser.on('up', updateAndDraw(true))
+        browser.on('down', updateAndDraw(false))
+      }
+      await browser.start()
       return browser
     })
   }
@@ -59,16 +61,16 @@ class ServiceManager {
     const message = chalk.keyword('hotpink')('living room servers at\n\n') + table(data, config)
     console.log(boxen(message, formatting))
   }
+
+  async close () {
+    for (let browser of this.browsers) {
+      // how come no browser.stop?
+    }
+  }
 }
 
-const makeService = ({name, type, protocol, subtype}) => {
-  const defaults = {
-      http: '3000',
-      socketio: '3000',
-      osc: '41234'
-  }
-
-  const port = parseInt(process.env[`LIVING_ROOM_${type.toUpperCase}_PORT`] || defaults[type])
+const makeService = ({name, type, protocol, subtype, port}) => {
+  port = port || parseInt(process.env[`LIVING_ROOM_${type.toUpperCase}_PORT`])
   const hostname = process.env.LIVING_ROOM_NAME || require('os').hostname()
   const host = `${hostname}.local`
   const subtypes = ['livingroom']

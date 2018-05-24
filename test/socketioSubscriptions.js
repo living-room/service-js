@@ -1,19 +1,24 @@
 import test from 'ava'
 import io from 'socket.io-client'
+import pickPort from 'pick-port'
 
-test.beforeEach(t => {
+test.beforeEach(async t => {
   const Database = require('@living-room/database-js')
   const room = new Database()
 
-  const socketService = require('../src/services/socketio').create(
-    room.client('socket'),
-    { app: require('../src/services/httpserver'), verbose: false }
-  )
+  const SocketIOService = require('../src/services/socketio')
+  const port = await pickPort()
+  const socketservice = new SocketIOService({
+    room: room.client('socketio'),
+    port
+  })
+  t.context.app = await socketservice.listen()
   t.context.timesChanged = 0
 })
 
 test.cb('subscriptions in browser', t => {
-  const socket = io.connect(`http://localhost:3000`)
+  let { address, port, family } = t.context.app.address()
+  const socket = io.connect(`http://[${address}]:${port}`)
 
   const gorogstart = 'gorog is at 0.5, 0.7'
   const gorogmove = 'gorog is at 0.8, 0.4'
@@ -22,15 +27,13 @@ test.cb('subscriptions in browser', t => {
 
   const initialselections = JSON.stringify(['$name is at $x, $y'])
 
-  socket.on(initialselections, ({assertions, retractions}) => {
+  socket.on(initialselections, data => {
     if (t.context.timesChanged === 0) {
-      t.deepEqual([gorogstartparsed], assertions, "asserted:gorogstart:previousassertions")
-      t.deepEqual([], retractions, "asserted:gorogstart:previousretractions")
+      t.deepEqual([gorogstartparsed], data, "asserted:gorogstart:previousassertions")
       t.end()
       // FIXME: this never gets called...
     } else if (t.context.timesChanged === 1) {
-      t.deepEqual([gorogmoveparsed], assertions, "asserted:gorogmove:assertions")
-      t.deepEqual([], retractions, "asserted:gorogmove:retractions")
+      t.deepEqual([gorogmoveparsed], data, "asserted:gorogmove:assertions")
     }
     t.context.timesChanged++
   })
