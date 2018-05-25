@@ -16,7 +16,7 @@ test.beforeEach(async t => {
   t.context.app = await socketservice.listen()
   t.context.timesChanged = 0
 
-  let { address, port, family } = t.context.app.address()
+  let { address, family } = t.context.app.address()
   t.context.socket = io.connect(`http://[${address}]:${port}`)
 })
 

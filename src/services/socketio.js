@@ -42,8 +42,11 @@ module.exports = class SocketIOService extends HttpService {
       this.retract(facts)
     })
 
-    io.on('select', ({ data: facts, acknowledge }) => {
-      this.select(facts)
+    io.on('select', context => {
+      this.select(context.data)
+        .doAll(assertions => {
+          context.data = assertions
+        })
     })
 
     io.on('subscribe', context => {
