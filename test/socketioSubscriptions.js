@@ -15,12 +15,13 @@ test.beforeEach(async t => {
   })
   t.context.app = await socketservice.listen()
   t.context.timesChanged = 0
+
+  let { address, port, family } = t.context.app.address()
+  t.context.socket = io.connect(`http://[${address}]:${port}`)
 })
 
 test.cb('subscribe returns assertions and retractions', t => {
-  let { address, port, family } = t.context.app.address()
-  const socket = io.connect(`http://[${address}]:${port}`)
-
+  const socket = t.context.socket
   const gorogstart = 'gorog is at 0.5, 0.7'
   const gorogmove = 'gorog is at 0.8, 0.4'
   const gorogstartparsed = {name: {word: "gorog"}, x: {value: 0.5}, y:{value: 0.7}}
