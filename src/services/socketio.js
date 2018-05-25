@@ -50,17 +50,14 @@ module.exports = class SocketIOService extends HttpService {
 
     io.on('subscribe', context => {
       const {
-        data: patternsString,
+        data,
         socket,
         subscriptions,
         acknowledge
       } = context
-      const patterns = JSON.parse(patternsString)
-      const subscription = room.subscribe(patterns, changes => {
-        socket.emit(patternsString, changes)
+      room.subscribe(...data, changes => {
+        socket.emit(JSON.stringify(data), changes)
       })
-      subscriptions.add(patternsString)
-      context.data = patternsString
     })
   }
 

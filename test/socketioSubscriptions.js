@@ -27,21 +27,41 @@ test.cb('subscribe returns assertions and retractions', t => {
   const gorogstartparsed = {name: {word: "gorog"}, x: {value: 0.5}, y:{value: 0.7}}
   const gorogmoveparsed = {name: {word: "gorog"}, x: {value: 0.8}, y:{value: 0.4}}
 
-  const initialselections = JSON.stringify('$name is at $x, $y')
+  const subscription = ['$name is at $x, $y']
 
-  socket.on(initialselections, ({assertions, retractions}) => {
+  socket.on(JSON.stringify(subscription), ({assertions, retractions}) => {
     if (t.context.timesChanged === 0) {
-      t.deepEqual([gorogstartparsed], assertions, "asserted:gorogstart:previousassertions")
-      t.deepEqual([], retractions, "retracted:gorogstart:previousassertions")
+      t.deepEqual([gorogstartparsed], assertions)
+      t.deepEqual([], retractions)
       t.end()
-      // FIXME: this never gets called...
-    } else if (t.context.timesChanged === 1) {
-      t.deepEqual([gorogmoveparsed], assertions, "asserted:gorogmove:assertions")
-      t.deepEqual([], retractions, "retracted:gorogmove:assertions")
     }
     t.context.timesChanged++
   })
 
   setTimeout(() => socket.emit('assert', [gorogstart]), 10)
-  setTimeout(() => socket.emit('subscribe', initialselections), 50)
+})
+
+test.cb('multisubscribe', t => {
+  const socket = t.context.socket
+  const subscription = [
+    '$name has speed ($dx, $dy)',
+    '$name is at ($x, $y)'
+  ]
+
+  const facts = ['gorog has speed (1, 2)', 'gorog is at (0.5, 0.5)']
+
+  socket.emit('subscribe', subscription, acknowledge => {
+    if (acknowledge != subscription) throw new Error(`subscription to ${subscription} failed`)
+    socket.on(JSON.stringify(subscription), ({assertions, retractions}) => {
+      if (t.context.timesChanged === 0) {
+        t.deepEqual([], assertions)
+        t.deepEqual([], retractions)
+        t.end()
+      }
+      t.context.timesChanged++
+    })
+  })
+
+  setTimeout(() => socket.emit('assert', [facts[0]]), 10)
+  setTimeout(() => socket.emit('assert', [facts[1]]), 50)
 })
