@@ -29,8 +29,8 @@ class LivingRoomService {
       port: this.oscport,
       verbose: this.verbose
     })
-    this.socketioapp = this.socketio.listen()
-    this.oscapp = this.osc.listen()
+    this.socketioapp = await this.socketio.listen()
+    this.oscapp = await this.osc.listen()
     this.manager = new ServiceManager({
       verbose,
       services: [...this.socketio._services, ...this.osc._services]
@@ -42,7 +42,9 @@ class LivingRoomService {
       process.exit(0)
     })
 
-    return { port: this.port, oscport: this.oscport }
+    return new Promise((resolve, reject) => {
+      resolve({ port: this.port, oscport: this.oscport })
+    })
   }
 
   close () {
@@ -50,9 +52,9 @@ class LivingRoomService {
   }
 }
 
-const listen = () => {
+const listen = async () => {
   const service = new LivingRoomService()
-  service.listen()
+  await service.listen()
   return service
 }
 
