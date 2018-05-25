@@ -16,10 +16,9 @@ module.exports = class SocketIOService extends HttpService {
     if (verbose) {
       io.use(async (context, next) => {
         const requestBody = util.inspect(context.data)
-        console.log(`<- ${context.event} ${requestBody}`)
+        console.log(`<-  ${context.event} ${requestBody}`)
         await next()
-        const responseBody = util.inspect(context.data)
-        console.log(`<- ${context.event} ${responseBody}`)
+        console.log(` -> ${util.inspect(context.data)}`)
       })
     }
 
@@ -28,39 +27,39 @@ module.exports = class SocketIOService extends HttpService {
     io.use(async (context, next) => {
       context.subscriptions = subscriptions
       await next()
+      if (context.acknowledge) context.acknowledge(context.data)
     })
 
-    io.on('messages', async ({ data: facts, acknowledge }) => {
+    io.on('messages', ({ data: facts, acknowledge }) => {
       this.message(facts)
-      if (acknowledge) acknowledge(facts)
     })
 
-    io.on('assert', async ({ data: facts, acknowledge }) => {
+    io.on('assert', ({ data: facts, acknowledge }) => {
       this.assert(facts)
-      if (acknowledge) acknowledge(facts)
     })
 
-    io.on('retract', async ({ data: facts, acknowledge }) => {
+    io.on('retract', ({ data: facts, acknowledge }) => {
       this.retract(facts)
-      if (acknowledge) acknowledge(facts)
     })
 
-    io.on('select', async ({ data: facts, acknowledge }) => {
+    io.on('select', ({ data: facts, acknowledge }) => {
       this.select(facts)
-      if (acknowledge) acknowledge(facts)
     })
 
-    io.on(
-      'subscribe',
-      async ({ data: patternsString, socket, subscriptions, acknowledge }) => {
-        const patterns = JSON.parse(patternsString)
-        const subscription = room.subscribe(patterns, changes => {
-          socket.emit(patternsString, changes)
-        })
-        subscriptions.add(subscription)
-        if (acknowledge) acknowledge(subscription)
-      }
-    )
+    io.on('subscribe', context => {
+      const {
+        data: patternsString,
+        socket,
+        subscriptions,
+        acknowledge
+      } = context
+      const patterns = JSON.parse(patternsString)
+      const subscription = room.subscribe(patterns, changes => {
+        socket.emit(patternsString, changes)
+      })
+      subscriptions.add(patternsString)
+      context.data = patternsString
+    })
   }
 
   async listen () {

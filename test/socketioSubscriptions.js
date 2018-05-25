@@ -10,13 +10,14 @@ test.beforeEach(async t => {
   const port = await pickPort()
   const socketservice = new SocketIOService({
     room: room.client('socketio'),
+    verbose: true,
     port
   })
   t.context.app = await socketservice.listen()
   t.context.timesChanged = 0
 })
 
-test.cb('subscriptions in browser', t => {
+test.cb('subscribe returns assertions and retractions', t => {
   let { address, port, family } = t.context.app.address()
   const socket = io.connect(`http://[${address}]:${port}`)
 
@@ -25,15 +26,17 @@ test.cb('subscriptions in browser', t => {
   const gorogstartparsed = {name: {word: "gorog"}, x: {value: 0.5}, y:{value: 0.7}}
   const gorogmoveparsed = {name: {word: "gorog"}, x: {value: 0.8}, y:{value: 0.4}}
 
-  const initialselections = JSON.stringify(['$name is at $x, $y'])
+  const initialselections = JSON.stringify('$name is at $x, $y')
 
-  socket.on(initialselections, data => {
+  socket.on(initialselections, ({assertions, retractions}) => {
     if (t.context.timesChanged === 0) {
-      t.deepEqual([gorogstartparsed], data, "asserted:gorogstart:previousassertions")
+      t.deepEqual([gorogstartparsed], assertions, "asserted:gorogstart:previousassertions")
+      t.deepEqual([], retractions, "retracted:gorogstart:previousassertions")
       t.end()
       // FIXME: this never gets called...
     } else if (t.context.timesChanged === 1) {
-      t.deepEqual([gorogmoveparsed], data, "asserted:gorogmove:assertions")
+      t.deepEqual([gorogmoveparsed], assertions, "asserted:gorogmove:assertions")
+      t.deepEqual([], retractions, "retracted:gorogmove:assertions")
     }
     t.context.timesChanged++
   })
