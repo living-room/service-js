@@ -49,12 +49,7 @@ module.exports = class SocketIOService extends HttpService {
     })
 
     io.on('subscribe', context => {
-      const {
-        data,
-        socket,
-        subscriptions,
-        acknowledge
-      } = context
+      const { data, socket, subscriptions, acknowledge } = context
       room.subscribe(...data, changes => {
         socket.emit(JSON.stringify(data), changes)
       })
