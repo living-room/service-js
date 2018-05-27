@@ -21,13 +21,13 @@ class LivingRoomService {
     this.socketio = new SocketIOService({
       room: this.room,
       port: this.port,
-      verbose: this.verbose
+      verbose
     })
 
     this.osc = new OscService({
       room: this.room,
       port: this.oscport,
-      verbose: this.verbose
+      verbose
     })
     this.socketioapp = await this.socketio.listen()
     this.oscapp = await this.osc.listen()
@@ -52,9 +52,9 @@ class LivingRoomService {
   }
 }
 
-const listen = async () => {
+const listen = async (options) => {
   const service = new LivingRoomService()
-  await service.listen()
+  await service.listen(options)
   return service
 }
 
