@@ -1,5 +1,4 @@
 const Database = require('@living-room/database-js')
-const room = new Database()
 const pickPort = require('pick-port')
 
 const SocketIOService = require('./src/services/socketio')
@@ -8,6 +7,7 @@ const { ServiceManager } = require('./src/manager')
 
 class LivingRoomService {
   constructor ({ verbose, port, oscport } = { verbose: false }) {
+    const room = new Database()
     this.verbose = verbose
     this.port = port
     this.oscport = oscport
