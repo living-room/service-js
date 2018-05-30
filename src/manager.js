@@ -43,7 +43,6 @@ class ServiceManager {
       borderColor: 'cyanBright',
       padding: 1,
       borderStyle: 'round',
-      float: 'center',
       dimBorder: true
     }
 

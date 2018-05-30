@@ -86,7 +86,7 @@ module.exports = class OscService {
         if (this.verbose) console.dir(address, args)
 
         const connection = this.connections.get(id)
-        const handle = this.messageHandlers[address]
+        const handle = this.messageHandlers[address] || console.dir
         handle({ address, args, connection })
       }
     )

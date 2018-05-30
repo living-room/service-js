@@ -26,7 +26,7 @@ const log = () => async (context, next) => {
   console.log(`<- ${context.url} ${requestBody}`)
   await next()
   const responseBody = util.inspect(context.body)
-  console.log(`-> ${context.url} ${requestBody}`)
+  console.log(`-> ${context.url} ${responseBody}`)
 }
 
 module.exports = class HttpService {
@@ -70,9 +70,7 @@ module.exports = class HttpService {
 
     app.use(
       route.get('/facts', async context => {
-        if (
-          context.accepts('json', 'text/event-stream') == 'text/event-stream'
-        ) {
+        if (context.accepts('json', 'text/event-stream') === 'text/event-stream') {
           let stream = new DBStream(this.room)
           context.req.on('close,finish,error', () => {
             stream.end()
@@ -114,7 +112,7 @@ module.exports = class HttpService {
   }
 
   async facts () {
-    return await this.room.getAllFacts()
+    return this.room.getAllFacts()
   }
 
   broadcast () {

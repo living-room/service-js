@@ -22,23 +22,20 @@ module.exports = class SocketIOService extends HttpService {
       })
     }
 
-    const subscriptions = new Set()
-
-    io.use(async (context, next) => {
-      context.subscriptions = subscriptions
+    io.use(async ({acknowledge, data}, next) => {
       await next()
-      if (context.acknowledge) context.acknowledge(context.data)
+      if (acknowledge) acknowledge(data)
     })
 
-    io.on('messages', ({ data: facts, acknowledge }) => {
+    io.on('messages', ({ data: facts }) => {
       this.message(facts)
     })
 
-    io.on('assert', ({ data: facts, acknowledge }) => {
+    io.on('assert', ({ data: facts }) => {
       this.assert(facts)
     })
 
-    io.on('retract', ({ data: facts, acknowledge }) => {
+    io.on('retract', ({ data: facts }) => {
       this.retract(facts)
     })
 
@@ -48,8 +45,7 @@ module.exports = class SocketIOService extends HttpService {
       })
     })
 
-    io.on('subscribe', context => {
-      const { data, socket, subscriptions, acknowledge } = context
+    io.on('subscribe', ({ data }) => {
       room.subscribe(...data, changes => {
         socket.emit(JSON.stringify(data), changes)
       })
