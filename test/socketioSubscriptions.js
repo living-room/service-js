@@ -15,8 +15,7 @@ test.beforeEach(async t => {
   })
   t.context.app = await socketservice.listen()
   t.context.timesChanged = 0
-
-  let { address, family } = t.context.app.address()
+  let { address } = t.context.app.address()
   t.context.socket = io.connect(`http://[${address}]:${port}`)
 })
 
@@ -27,10 +26,7 @@ test.afterEach(async t => {
 test.cb('subscribe returns assertions and retractions', t => {
   const socket = t.context.socket
   const gorogstart = 'gorog is at 0.5, 0.7'
-  const gorogmove = 'gorog is at 0.8, 0.4'
-  const gorogstartparsed = {name: {word: "gorog"}, x: {value: 0.5}, y:{value: 0.7}}
-  const gorogmoveparsed = {name: {word: "gorog"}, x: {value: 0.8}, y:{value: 0.4}}
-
+  const gorogstartparsed = {name: {word: 'gorog'}, x: {value: 0.5}, y: {value: 0.7}}
   const subscription = ['$name is at $x, $y']
 
   socket.on(JSON.stringify(subscription), ({assertions, retractions}) => {
@@ -81,7 +77,7 @@ test.cb('multisubscribe', t => {
 
   socket.emit('subscribe', subscription, acknowledge => {
     t.deepEqual(acknowledge, subscription)
-    //FIXME: how come socket.on() doesn't work here?
+    // FIXME: how come socket.on() doesn't work here?
   })
 
   setTimeout(() => socket.emit('assert', [facts[0]]), 10)

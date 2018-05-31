@@ -1,6 +1,5 @@
 const Socket = require('koa-socket-2')
 const { makeService } = require('../manager')
-const hostname = require('os').hostname()
 const HttpService = require('./http')
 const util = require('util')
 
@@ -63,10 +62,13 @@ module.exports = class SocketIOService extends HttpService {
       port
     })
 
-    const nbonjour = require('nbonjour').create()
-    this._services.push(service)
-    const app = await this.app.listen(port)
-    nbonjour.publish(service)
-    return app
+    return new Promise((resolve, reject) => {
+      this.app.listen(port, '::', () => {
+        const nbonjour = require('nbonjour').create()
+        this._services.push(service)
+        nbonjour.publish(service)
+        resolve(this.app.server)
+      })
+    })
   }
 }
