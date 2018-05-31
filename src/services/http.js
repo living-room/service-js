@@ -70,7 +70,9 @@ module.exports = class HttpService {
 
     app.use(
       route.get('/facts', async context => {
-        if (context.accepts('json', 'text/event-stream') === 'text/event-stream') {
+        if (
+          context.accepts('json', 'text/event-stream') === 'text/event-stream'
+        ) {
           let stream = new DBStream(this.room)
           context.req.on('close,finish,error', () => {
             stream.end()

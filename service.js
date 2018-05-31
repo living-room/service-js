@@ -52,7 +52,7 @@ class LivingRoomService {
   }
 }
 
-const listen = async (options) => {
+const listen = async options => {
   const service = new LivingRoomService()
   await service.listen(options)
   return service

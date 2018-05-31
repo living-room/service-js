@@ -40,11 +40,9 @@ module.exports = class SocketIOService extends HttpService {
     })
 
     io.on('select', context => {
-      this
-        .select(context.data)
-        .doAll(assertions => {
-          context.data = assertions
-        })
+      this.select(context.data).doAll(assertions => {
+        context.data = assertions
+      })
     })
 
     io.on('subscribe', ({ data, socket }) => {
