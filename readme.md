@@ -1,6 +1,6 @@
 # service-js
 
-<img src="./images/npmstart.png" width="345" align="right" />
+<img src="images/npmstart.png" width="345" align="right" />
 
 Creates a living room that you can connect to over HTTP, eventstreams, socket.io, and osc!
 
