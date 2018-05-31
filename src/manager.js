@@ -57,7 +57,9 @@ class ServiceManager {
           return false
       }
     }
-    const message = chalk.keyword('hotpink')('living room servers at\n\n') + table(data, config)
+    const tablestring = table(data, config).split('\n')
+    tablestring.splice(-1)
+    const message = chalk.keyword('hotpink')('living room servers at\n\n') + tablestring.join('\n')
     console.log(boxen(message, formatting))
   }
 
