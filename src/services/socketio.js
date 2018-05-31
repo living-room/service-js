@@ -63,7 +63,7 @@ module.exports = class SocketIOService extends HttpService {
     })
 
     return new Promise((resolve, reject) => {
-      this.app.listen(port, '::', () => {
+      this.app.listen(port, '0.0.0.0', () => {
         const nbonjour = require('nbonjour').create()
         this._services.push(service)
         nbonjour.publish(service)
