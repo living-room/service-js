@@ -22,9 +22,9 @@ module.exports = class SocketIOService extends HttpService {
       })
     }
 
-    io.use(async ({acknowledge, data}, next) => {
+    io.use(async (context, next) => {
       await next()
-      if (acknowledge) acknowledge(data)
+      if (context.acknowledge) context.acknowledge(context.data)
     })
 
     io.on('messages', ({ data: facts }) => {
@@ -40,12 +40,14 @@ module.exports = class SocketIOService extends HttpService {
     })
 
     io.on('select', context => {
-      this.select(context.data).doAll(assertions => {
-        context.data = assertions
-      })
+      this
+        .select(context.data)
+        .doAll(assertions => {
+          context.data = assertions
+        })
     })
 
-    io.on('subscribe', ({ data }) => {
+    io.on('subscribe', ({ data, socket }) => {
       room.subscribe(...data, changes => {
         socket.emit(JSON.stringify(data), changes)
       })
