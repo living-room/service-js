@@ -54,7 +54,9 @@
     ]
   },
   "husky": {
-    "pre-commit": "npm-run-all -s format test",
-    "pre-push": "npm-run-all -s format test"
+    "hooks": {
+      "pre-commit": "npm-run-all -s format test",
+      "pre-push": "npm-run-all -s format test"
+    }
   }
 }
