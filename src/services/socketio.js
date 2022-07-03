@@ -1,9 +1,11 @@
-const Socket = require('koa-socket-2')
-const { makeService } = require('../manager')
-const HttpService = require('./http')
-const util = require('util')
+import Socket from 'koa-socket-2'
+import { makeService } from '../manager.js'
+import HttpService from './http.js'
+import util from 'util'
+import { hostname } from 'os'
+import nbonjour from 'nbonjour'
 
-module.exports = class SocketIOService extends HttpService {
+export default class SocketIOService extends HttpService {
   constructor ({ room, port, verbose }) {
     super({ room, port, verbose })
     this.room = this.room || room
@@ -54,9 +56,8 @@ module.exports = class SocketIOService extends HttpService {
   async listen () {
     super.broadcast()
     const port = this.port
-    const hostname = require('os').hostname()
     const service = makeService({
-      name: `${hostname}-${port}-living-room-socketio`,
+      name: `${hostname()}-${port}-living-room-socketio`,
       type: 'http',
       subtype: 'socketio',
       port
@@ -64,9 +65,9 @@ module.exports = class SocketIOService extends HttpService {
 
     return new Promise((resolve, reject) => {
       this.app.listen(port, '0.0.0.0', () => {
-        const nbonjour = require('nbonjour').create()
+        const bonjour = nbonjour.create()
         this._services.push(service)
-        nbonjour.publish(service)
+        bonjour.publish(service)
         resolve(this.app.server)
       })
     })

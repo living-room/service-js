@@ -1,12 +1,14 @@
-const util = require('util')
+import util from 'util'
 
-const Koa = require('koa')
-const body = require('koa-body')
-const cors = require('@koa/cors')
-const route = require('koa-route')
-const static_ = require('koa-static')
-const DBStream = require('./dbstream')
-const { makeService } = require('../manager')
+import Koa from 'koa'
+import body from 'koa-body'
+import cors from '@koa/cors'
+import route from 'koa-route'
+import static_ from 'koa-static'
+import DBStream from './dbstream.js'
+import { makeService } from '../manager.js'
+import { hostname } from 'os'
+import nbonjour from 'nbonjour'
 
 const parsefacts = () => async (context, next) => {
   let { facts } = context.request.body
@@ -29,7 +31,7 @@ const log = () => async (context, next) => {
   console.log(`-> ${context.url} ${responseBody}`)
 }
 
-module.exports = class HttpService {
+export default class HttpService {
   constructor (options) {
     this.options = options
     this.room = options.room
@@ -73,7 +75,7 @@ module.exports = class HttpService {
         if (
           context.accepts('json', 'text/event-stream') === 'text/event-stream'
         ) {
-          let stream = new DBStream(this.room)
+          const stream = new DBStream(this.room)
           context.req.on('close,finish,error', () => {
             stream.end()
           })
@@ -119,15 +121,14 @@ module.exports = class HttpService {
 
   broadcast () {
     const { port } = this.options
-    const hostname = require('os').hostname()
-    const nbonjour = require('nbonjour').create()
+    const bonjour = nbonjour.create()
     const service = makeService({
-      name: `${hostname}-${port}-living-room-http`,
+      name: `${hostname()}-${port}-living-room-http`,
       type: 'http',
       port
     })
     this._services.push(service)
-    nbonjour.publish(service)
+    bonjour.publish(service)
   }
 
   listen () {

@@ -1,6 +1,10 @@
-const boxen = require('boxen')
-const chalk = require('chalk').default
-const nbonjour = require('nbonjour').create()
+import boxen from 'boxen'
+import chalk from 'chalk'
+import nbonjour from 'nbonjour'
+import os from 'os'
+import { table, getBorderCharacters } from 'table'
+
+const bonjour = nbonjour.create()
 
 class ServiceManager {
   constructor({services, verbose}={verbose: true}) {
@@ -29,8 +33,6 @@ class ServiceManager {
   }
 
   draw() {
-    const { table, getBorderCharacters } = require('table')
-
     const data = []
     for (const [url, up] of this.seen) {
       const seen = url.split(' ')
@@ -72,11 +74,11 @@ class ServiceManager {
 
 const makeService = ({name, type, protocol, subtype, port}) => {
   port = port || parseInt(process.env[`LIVING_ROOM_${type.toUpperCase}_PORT`])
-  const hostname = process.env.LIVING_ROOM_NAME || require('os').hostname()
+  const hostname = process.env.LIVING_ROOM_NAME || os.hostname()
   const host = `${hostname}.local`
   const subtypes = ['livingroom']
   if(subtype) subtypes.push(subtype)
   return {type, protocol, port, name, subtypes, host}
 }
 
-module.exports = { ServiceManager, makeService }
+export { ServiceManager, makeService }

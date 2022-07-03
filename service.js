@@ -1,9 +1,9 @@
-const Database = require('@living-room/database-js')
-const pickPort = require('pick-port')
+import Database from '@living-room/database-js.js'
+import pickPort from 'pick-port'
 
-const SocketIOService = require('./src/services/socketio')
-const OscService = require('./src/services/osc')
-const { ServiceManager } = require('./src/manager')
+import SocketIOService from './src/services/socketio.js'
+import OscService from './src/services/osc.js'
+import { ServiceManager } from './src/manager.js'
 
 class LivingRoomService {
   constructor ({ verbose, port, oscport } = { verbose: false }) {
@@ -38,7 +38,7 @@ class LivingRoomService {
 
     process.on('SIGINT', () => {
       console.log()
-      console.log(`see you later, space surfer...`)
+      console.log('see you later, space surfer...')
       process.exit(0)
     })
 
@@ -58,4 +58,4 @@ const listen = async options => {
   return service
 }
 
-module.exports = { listen, LivingRoomService }
+export { listen, LivingRoomService }

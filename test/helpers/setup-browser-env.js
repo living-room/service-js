@@ -1,2 +1,2 @@
-const browserEnv = require('browser-env')
+import browserEnv from 'browser-env'
 browserEnv(['window', 'document'])

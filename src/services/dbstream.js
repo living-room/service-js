@@ -1,11 +1,10 @@
-const { Readable } = require('stream')
-
-module.exports = class DBStream extends Readable {
+import { Readable } from 'stream'
+export default class DBStream extends Readable {
   constructor (room) {
-    let assertCb = fact => {
+    const assertCb = fact => {
       this.push(`event:assert\ndata:${fact}\n\n`)
     }
-    let retractCb = fact => {
+    const retractCb = fact => {
       this.push(`event:retract\ndata:${fact}\n\n`)
     }
 

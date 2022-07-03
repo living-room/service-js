@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+
+# we do not want to accidentally run `npm install`
+# shellcheck disable=SC2016
+git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD \
+  | grep --quiet --extended-regexp 'package(-lock)?.json' 2>/dev/null \
+  && printf '\n\x1b[93;41m\t%s\x1b[0m\n' \
+    'dependencies may have changed, please run `npm install`'

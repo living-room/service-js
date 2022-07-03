@@ -1,6 +1,9 @@
-const { makeService } = require('../manager')
+import { makeService } from '../manager.js'
+import { UDPPort } from 'osc'
+import nbonjour from 'nbonjour'
+import { hostname } from 'os'
 
-module.exports = class OscService {
+export default class OscService {
   constructor ({ port, verbose, room }) {
     this.verbose = verbose
     this.port = port
@@ -51,7 +54,6 @@ module.exports = class OscService {
   }
 
   listen () {
-    const { UDPPort } = require('osc')
     const port = this.port
 
     const osc = new UDPPort({
@@ -59,18 +61,17 @@ module.exports = class OscService {
       localPort: port
     })
 
-    const hostname = require('os').hostname()
-    const nbonjour = require('nbonjour').create()
+    const bonjour = nbonjour.create()
     const service = makeService({
-      name: `${hostname}-${port}-living-room-osc`,
+      name: `${hostname()}-${port}-living-room-osc`,
       type: 'osc',
       protocol: 'udp',
       port
     })
     this._services = [service]
 
-    osc.on(`ready`, () => {
-      nbonjour.publish(this._services[0])
+    osc.on('ready', () => {
+      bonjour.publish(this._services[0])
     })
 
     osc.on(
