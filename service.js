@@ -1,4 +1,4 @@
-import Database from '@living-room/database-js.js'
+import Database from '@living-room/database-js'
 import pickPort from 'pick-port'
 
 import SocketIOService from './src/services/socketio.js'
