@@ -7,13 +7,13 @@ import { table, getBorderCharacters } from 'table'
 const bonjour = nbonjour.create()
 
 class ServiceManager {
-  constructor({services, verbose}={verbose: true}) {
+  constructor ({ services, verbose } = { verbose: true }) {
     // seen: Map<url: String, up: bool>
     this.seen = new Map()
     this.drawTimeout = null
 
     const updateAndDraw = up => (wut, b, c, d) => {
-      const {type, protocol, host, port, subtypes, referer} = wut
+      const { type, host, port, subtypes } = wut
       const subtype = subtypes.length === 1 ? type : subtypes[subtypes.length - 1]
       this.seen.set(`${subtype} ${type}://${host}:${port}`, up)
 
@@ -22,7 +22,7 @@ class ServiceManager {
     }
 
     this.browsers = services.map(async service => {
-      const browser = nbonjour.find(service)
+      const browser = bonjour.find(service)
       if (verbose) {
         browser.on('up', updateAndDraw(true))
         browser.on('down', updateAndDraw(false))
@@ -52,11 +52,11 @@ class ServiceManager {
       columns: { 0: { alignment: 'right' } },
       border: getBorderCharacters('void'),
       columnDefault: {
-          paddingLeft: 0,
-          paddingRight: 1
+        paddingLeft: 0,
+        paddingRight: 1
       },
       drawHorizontalLine: () => {
-          return false
+        return false
       }
     }
     const tablestring = table(data, config).split('\n')
@@ -66,19 +66,20 @@ class ServiceManager {
   }
 
   async close () {
-    for (let browser of this.browsers) {
+    for (const browser of this.browsers) {
       // how come no browser.stop?
+      browser.stop()
     }
   }
 }
 
-const makeService = ({name, type, protocol, subtype, port}) => {
+const makeService = ({ name, type, protocol, subtype, port }) => {
   port = port || parseInt(process.env[`LIVING_ROOM_${type.toUpperCase}_PORT`])
   const hostname = process.env.LIVING_ROOM_NAME || os.hostname()
   const host = `${hostname}.local`
   const subtypes = ['livingroom']
-  if(subtype) subtypes.push(subtype)
-  return {type, protocol, port, name, subtypes, host}
+  if (subtype) subtypes.push(subtype)
+  return { type, protocol, port, name, subtypes, host }
 }
 
 export { ServiceManager, makeService }
