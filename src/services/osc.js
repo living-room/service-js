@@ -1,5 +1,5 @@
 import { makeService } from '../manager.js'
-import { UDPPort } from 'osc'
+import Osc from 'osc'
 import nbonjour from 'nbonjour'
 import { hostname } from 'os'
 
@@ -56,7 +56,7 @@ export default class OscService {
   listen () {
     const port = this.port
 
-    const osc = new UDPPort({
+    const osc = new Osc.UDPPort({
       localAddress: '0.0.0.0',
       localPort: port
     })
@@ -80,7 +80,7 @@ export default class OscService {
         const id = `osc://${remoteAddress}:${remotePort}`
 
         if (!this.connections.has(id)) {
-          const connection = new UDPPort({ remoteAddress, remotePort })
+          const connection = new Osc.UDPPort({ remoteAddress, remotePort })
           this.connections.set(id, connection)
         }
 
