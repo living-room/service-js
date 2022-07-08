@@ -10,22 +10,18 @@ export default function SocketIoService ({ room, port, verbose }) {
   if (verbose) io.use(log)
 
   io.on('connection', (socket) => {
-    socket.on('ping', (p) => socket.emit('pong', p + 1))
+    socket.on('ping', (ping) => socket.emit('pong', ping + 1))
 
-    socket.on('assert', (data) => {
-      room.assert(data)
-      room.flushChanges()
-    })
-    socket.on('retract', (data) => {
-      room.retract(data)
-      room.flushChanges()
-    })
+    socket.on('assert', (data) => room.assert(data).flushChanges())
+    socket.on('retract', (data) => room.retract(data).flushChanges())
     socket.on('flush', () => room.flushChanges())
 
     socket.on('select', context => {
-      room.select(context.data).doAll(assertions => {
-        context.data = assertions
-      })
+      room
+        .select(context.data)
+        .doAll(assertions => {
+          context.data = assertions
+        })
     })
 
     socket.on('subscribe', (event, acknowledgement) => {
