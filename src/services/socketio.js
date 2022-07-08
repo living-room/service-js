@@ -1,75 +1,57 @@
-import Socket from 'koa-socket-2'
 import { makeService } from '../manager.js'
-import HttpService from './http.js'
 import util from 'util'
 import { hostname } from 'os'
 import nbonjour from 'nbonjour'
+import { Server } from 'socket.io'
 
-export default class SocketIOService extends HttpService {
-  constructor ({ room, port, verbose }) {
-    super({ room, port, verbose })
-    this.room = this.room || room
-    this.port = this.port || port
+export default function SocketIoService ({ room, port, verbose }) {
+  const io = new Server()
 
-    const io = new Socket()
-    io.attach(this.app)
+  if (verbose) io.use(log)
 
-    if (verbose) {
-      io.use(async (context, next) => {
-        const requestBody = util.inspect(context.data)
-        console.log(`<-  ${context.event} ${requestBody}`)
-        await next()
-        console.log(` -> ${util.inspect(context.data)}`)
-      })
-    }
+  io.on('connection', (socket) => {
+    socket.on('ping', (p) => socket.emit('pong', p + 1))
 
-    io.use(async (context, next) => {
-      await next()
-      if (context.acknowledge) context.acknowledge(context.data)
+    socket.on('assert', (data) => {
+      room.assert(data)
+      room.flushChanges()
     })
-
-    io.on('messages', ({ data: facts }) => {
-      this.message(facts)
+    socket.on('retract', (data) => {
+      room.retract(data)
+      room.flushChanges()
     })
+    socket.on('flush', () => room.flushChanges())
 
-    io.on('assert', ({ data: facts }) => {
-      this.assert(facts)
-    })
-
-    io.on('retract', ({ data: facts }) => {
-      this.retract(facts)
-    })
-
-    io.on('select', context => {
-      this.select(context.data).doAll(assertions => {
+    socket.on('select', context => {
+      room.select(context.data).doAll(assertions => {
         context.data = assertions
       })
     })
 
-    io.on('subscribe', ({ data, socket }) => {
-      room.subscribe(...data, changes => {
-        socket.emit(JSON.stringify(data), changes)
-      })
+    socket.on('subscribe', (event, acknowledgement) => {
+      acknowledgement?.(event)
+      room.subscribe(...event, changes => socket.emit(event, changes))
     })
+  })
+
+  const service = makeService({
+    name: `${hostname()}-${port}-living-room-socketio`,
+    type: 'http',
+    subtype: 'socketio',
+    port
+  })
+
+  const listen = () => {
+    io.listen(port)
+    nbonjour.create().publish(service)
   }
 
-  async listen () {
-    super.broadcast()
-    const port = this.port
-    const service = makeService({
-      name: `${hostname()}-${port}-living-room-socketio`,
-      type: 'http',
-      subtype: 'socketio',
-      port
-    })
+  return { service, listen }
+}
 
-    return new Promise((resolve, reject) => {
-      this.app.listen(port, '0.0.0.0', () => {
-        const bonjour = nbonjour.create()
-        this._services.push(service)
-        bonjour.publish(service)
-        resolve(this.app.server)
-      })
-    })
-  }
+const log = async ({ event, data }, next) => {
+  const payload = util.inspect(data) ?? ''
+  console.log(`<-  ${event ?? ''} ${payload}`)
+  await next()
+  console.log(` -> ${event ?? ''} ${payload}`)
 }

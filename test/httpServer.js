@@ -9,7 +9,7 @@ const gorogMoves = '#gorog is a barbarian at 99, 11'
 
 test.beforeEach(async t => {
   const database = new Database()
-  const room = database.client('http')
+  const room = database.client('test-http')
   const port = await pickPort({ type: 'tcp' })
   const httpService = new HttpService({ room, port })
   t.context.app = await httpService.listen()

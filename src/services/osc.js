@@ -7,7 +7,14 @@ export default class OscService {
   constructor ({ port, verbose, room }) {
     this.verbose = verbose
     this.port = port
-    this._services = []
+
+    this.service = makeService({
+      name: `${hostname()}-${port}-living-room-osc`,
+      type: 'osc',
+      protocol: 'udp',
+      port
+    })
+
     this.connections = new Map()
     this.messageHandlers = {
       '/messages': ({ args }) => {
@@ -54,25 +61,12 @@ export default class OscService {
   }
 
   listen () {
-    const port = this.port
-
     const osc = new Osc.UDPPort({
       localAddress: '0.0.0.0',
-      localPort: port
+      localPort: this.port
     })
 
-    const bonjour = nbonjour.create()
-    const service = makeService({
-      name: `${hostname()}-${port}-living-room-osc`,
-      type: 'osc',
-      protocol: 'udp',
-      port
-    })
-    this._services = [service]
-
-    osc.on('ready', () => {
-      bonjour.publish(this._services[0])
-    })
+    osc.on('ready', () => nbonjour.create().publish(this.service))
 
     osc.on(
       'message',

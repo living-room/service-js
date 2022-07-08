@@ -1,48 +1,44 @@
 import Database from '@living-room/database-js'
 import pickPort from 'pick-port'
 
-import SocketIOService from './src/services/socketio.js'
+import SocketIoService from './src/services/socketio.js'
 import OscService from './src/services/osc.js'
 import { ServiceManager } from './src/manager.js'
 
-class LivingRoomService {
+export default class LivingRoomService {
   constructor ({ verbose, port, oscport } = { verbose: false }) {
     const room = new Database()
     this.verbose = verbose
     this.port = port
     this.oscport = oscport
-    this.room = room.client('socketio')
+    this.room = room.client()
   }
 
   async listen ({ verbose } = { verbose: true }) {
     this.port = this.port || (await pickPort({ type: 'tcp' }))
     this.oscport = this.oscport || (await pickPort())
 
-    this.socketio = new SocketIOService({
+    const osc = new OscService({
+      room: this.room,
+      port: this.oscport,
+      verbose
+    })
+
+    const socketio = SocketIoService({
       room: this.room,
       port: this.port,
       verbose
     })
 
-    this.osc = new OscService({
-      room: this.room,
-      port: this.oscport,
-      verbose
-    })
-    this.socketioapp = await this.socketio.listen()
-    this.oscapp = await this.osc.listen()
-    this.manager = new ServiceManager({
-      verbose,
-      services: [...this.socketio._services, ...this.osc._services]
-    })
+    this.manager = new ServiceManager({ verbose, services: [osc, socketio].map(({ service }) => service) })
 
     process.on('SIGINT', () => {
       console.log()
-      console.log('see you later, space surfer...')
+      console.log('see you later, couch surfer...')
       process.exit(0)
     })
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       resolve({ port: this.port, oscport: this.oscport })
     })
   }
@@ -51,11 +47,3 @@ class LivingRoomService {
     this.manager.close()
   }
 }
-
-const listen = async options => {
-  const service = new LivingRoomService()
-  await service.listen(options)
-  return service
-}
-
-export { listen, LivingRoomService }

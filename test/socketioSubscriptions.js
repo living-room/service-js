@@ -1,69 +1,86 @@
 import test from 'ava'
-import io from 'socket.io-client'
+import { io } from 'socket.io-client'
 import pickPort from 'pick-port'
 import Database from '@living-room/database-js'
 import SocketIOService from '../src/services/socketio.js'
 
 test.beforeEach(async t => {
-  const room = new Database()
+  const room = (new Database()).client('test')
   const port = await pickPort()
-  const socketservice = new SocketIOService({
-    room: room.client('socketio'),
-    verbose: true,
-    port
-  })
-  t.context.app = await socketservice.listen()
-  t.context.timesChanged = 0
-  const { address } = t.context.app.address()
-  t.context.socket = io.connect(`http://[${address}]:${port}`)
+  const verbose = true
+
+  const service = SocketIOService({ room, port, verbose })
+  service.listen()
+
+  t.context.client = io(`http://localhost:${port}`)
 })
 
-test.afterEach(async t => {
-  t.context.app.close()
+test('it connects', async t => {
+  const { client } = t.context
+  return new Promise((resolve) => {
+    const ping = 7
+
+    client.on('pong', (pong) => {
+      t.assert(pong === ping + 1)
+      resolve()
+    })
+    client.emit('ping', ping)
+  })
 })
 
 test('subscribe returns assertions and retractions', t => {
-  return new Promise((resolve, reject) => {
-    const socket = t.context.socket
-    const gorogstart = 'gorog is at 0.5, 0.7'
-    const gorogstartparsed = { name: { word: 'gorog' }, x: { value: 0.5 }, y: { value: 0.7 } }
-    const subscription = ['$name is at $x, $y']
+  const { client } = t.context
+  let callbacks = 0
+  const gorogstart = 'gorog is at 0.5, 0.7'
+  const gorogstartparsed = { name: { word: 'gorog' }, x: { value: 0.5 }, y: { value: 0.7 } }
+  const subscription = ['$name is at $x, $y']
 
-    socket.on(JSON.stringify(subscription), ({ assertions, retractions }) => {
-      if (t.context.timesChanged === 0) {
+  return new Promise((resolve, reject) => {
+    client.on('error', reject)
+
+    client.on(JSON.stringify(subscription), ({ assertions, retractions }) => {
+      if (callbacks === 0) {
         t.deepEqual([], assertions)
         t.deepEqual([], retractions)
-      } else if (t.context.timesChanged === 1) {
+      }
+
+      if (callbacks === 1) {
         t.deepEqual([gorogstartparsed], assertions)
         t.deepEqual([], retractions)
         resolve()
       }
-      t.context.timesChanged++
+      callbacks++
     })
 
-    socket.emit('subscribe', subscription, acknowledge => {
+    client.emit('subscribe', subscription, acknowledge => {
       t.deepEqual(acknowledge, subscription)
     })
 
-    setTimeout(() => socket.emit('assert', [gorogstart]), 10)
+    client.emit('assert', gorogstart)
   })
 })
 
 test('multisubscribe', t => {
+  let callbacks = 0
+  const { client } = t.context
+
+  const subscription = [
+    '$name has speed ($dx, $dy)',
+    '$name is at ($x, $y)'
+  ]
+
+  const facts = ['gorog has speed (1, 2)', 'gorog is at (0.5, 0.5)']
+
   return new Promise((resolve, reject) => {
-    const socket = t.context.socket
-    const subscription = [
-      '$name has speed ($dx, $dy)',
-      '$name is at ($x, $y)'
-    ]
+    client.on('error', reject)
 
-    const facts = ['gorog has speed (1, 2)', 'gorog is at (0.5, 0.5)']
-
-    socket.on(JSON.stringify(subscription), ({ assertions, retractions }) => {
-      if (t.context.timesChanged === 0) {
+    client.on(JSON.stringify(subscription), ({ assertions, retractions }) => {
+      if (callbacks === 0) {
         t.deepEqual([], assertions)
-        t.deepEqual(retractions, [])
-      } else if (t.context.timesChanged === 1) {
+        t.deepEqual([], retractions)
+      }
+
+      if (callbacks === 1) {
         t.deepEqual(assertions, [{
           name: { word: 'gorog' },
           dx: { value: 1 },
@@ -74,15 +91,13 @@ test('multisubscribe', t => {
         t.deepEqual([], retractions)
         resolve()
       }
-      t.context.timesChanged++
+      callbacks++
     })
 
-    socket.emit('subscribe', subscription, acknowledge => {
+    client.emit('subscribe', subscription, acknowledge => {
       t.deepEqual(acknowledge, subscription)
-      // FIXME: how come socket.on() doesn't work here?
+      client.emit('assert', facts[0])
+      client.emit('assert', facts[1])
     })
-
-    setTimeout(() => socket.emit('assert', [facts[0]]), 10)
-    setTimeout(() => socket.emit('assert', [facts[1]]), 50)
   })
 })

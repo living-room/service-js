@@ -38,14 +38,17 @@ export default class HttpService {
     this._services = []
     const app = new Koa()
 
-    app.use(cors())
+    app.use(cors({
+      origin: '*'
+    }))
+
     app.use(body({ multipart: true }))
     if (options.verbose) app.use(log())
 
     app.use(parsefacts())
 
     app.use(
-      route.post('/assert', async context => {
+      route.post('/assert', context => {
         this.assert(context.body.facts)
       })
     )
@@ -91,6 +94,7 @@ export default class HttpService {
 
     app.use(static_('examples'))
     this.app = app
+    return this.app
   }
 
   async assert (facts) {
@@ -132,7 +136,6 @@ export default class HttpService {
   }
 
   listen () {
-    this.broadcast()
-    return this.app.listen(this.options.port)
+    return this.app.listen(this.options.port, this.broadcast)
   }
 }

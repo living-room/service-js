@@ -1,6 +1,6 @@
 {
   "name": "@living-room/service-js",
-  "version": "0.6.20",
+  "version": "0.7.0",
   "main": "service.js",
   "type": "module",
   "description": "http, eventstream, socketio, and osc server for livingroom",
@@ -13,7 +13,7 @@
   ],
   "license": "MIT",
   "scripts": {
-    "start": "node -e 'import service from `./service.js`; service.listen()'",
+    "start": "node --eval 'import(`./service.js`).then(Room => (new Room.default).listen())'",
     "serve:examples": "serve examples",
     "lint": "standard *js src/**/*js",
     "format": "npm run lint -- --fix",
@@ -26,7 +26,7 @@
   ],
   "dependencies": {
     "@koa/cors": "3",
-    "@living-room/database-js": "^0.6",
+    "@living-room/database-js": "^0.7.0",
     "@living-room/parser-js": "^0.4",
     "ava": "^4.3.0",
     "boxen": "^7.0.0",

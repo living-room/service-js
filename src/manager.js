@@ -5,15 +5,14 @@ import os from 'os'
 import { table, getBorderCharacters } from 'table'
 
 const bonjour = nbonjour.create()
-
+// A ServiceManager just shows a box of whats on bonjour from a list of services
 class ServiceManager {
   constructor ({ services, verbose } = { verbose: true }) {
     // seen: Map<url: String, up: bool>
     this.seen = new Map()
     this.drawTimeout = null
 
-    const updateAndDraw = up => (wut, b, c, d) => {
-      const { type, host, port, subtypes } = wut
+    const updateAndDraw = up => ({ type, host, port, subtypes }) => {
       const subtype = subtypes.length === 1 ? type : subtypes[subtypes.length - 1]
       this.seen.set(`${subtype} ${type}://${host}:${port}`, up)
 
@@ -32,13 +31,13 @@ class ServiceManager {
     })
   }
 
-  draw() {
+  draw () {
     const data = []
     for (const [url, up] of this.seen) {
       const seen = url.split(' ')
       const type = seen.splice(0, 1)
       const colorType = up ? chalk.greenBright(...type) : chalk.red(...type)
-      data.push([ colorType, seen ])
+      data.push([colorType, seen])
     }
 
     const formatting = {
@@ -61,13 +60,12 @@ class ServiceManager {
     }
     const tablestring = table(data, config).split('\n')
     tablestring.splice(-1)
-    const message = chalk.keyword('hotpink')('living room servers at\n\n') + tablestring.join('\n')
+    const message = chalk.magentaBright('living room servers at\n\n') + tablestring.join('\n')
     console.log(boxen(message, formatting))
   }
 
   async close () {
     for (const browser of this.browsers) {
-      // how come no browser.stop?
       browser.stop()
     }
   }
@@ -76,7 +74,7 @@ class ServiceManager {
 const makeService = ({ name, type, protocol, subtype, port }) => {
   port = port || parseInt(process.env[`LIVING_ROOM_${type.toUpperCase}_PORT`])
   const hostname = process.env.LIVING_ROOM_NAME || os.hostname()
-  const host = `${hostname}.local`
+  const host = os.platform === 'linux' ? `${hostname}.local` : hostname
   const subtypes = ['livingroom']
   if (subtype) subtypes.push(subtype)
   return { type, protocol, port, name, subtypes, host }
