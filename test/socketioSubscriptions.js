@@ -7,9 +7,8 @@ import SocketIOService from '../src/services/socketio.js'
 test.beforeEach(async t => {
   const room = (new Database()).client('test')
   const port = await pickPort()
-  const verbose = true
 
-  const service = SocketIOService({ room, port, verbose })
+  const service = SocketIOService({ room, port })
   service.listen()
 
   t.context.client = io(`http://localhost:${port}`)
@@ -17,14 +16,30 @@ test.beforeEach(async t => {
 
 test('it connects', async t => {
   const { client } = t.context
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const ping = 7
-
+    client.on('error', reject)
     client.on('pong', (pong) => {
       t.assert(pong === ping + 1)
       resolve()
     })
     client.emit('ping', ping)
+  })
+})
+
+test('select works', t => {
+  const { client } = t.context
+  const gorogstart = 'gorog is at 0.5, 0.7'
+  const gorogstartparsed = { name: { word: 'gorog' }, x: { value: 0.5 }, y: { value: 0.7 } }
+  const selection = '$name is at $x, $y'
+
+  return new Promise((resolve, reject) => {
+    client.on('error', reject)
+    client.emit('assert', gorogstart)
+    client.emit('select', selection, (data) => {
+      t.deepEqual([gorogstartparsed], data)
+      resolve()
+    })
   })
 })
 
@@ -38,7 +53,7 @@ test('subscribe returns assertions and retractions', t => {
   return new Promise((resolve, reject) => {
     client.on('error', reject)
 
-    client.on(JSON.stringify(subscription), ({ assertions, retractions }) => {
+    client.on(subscription, ({ assertions, retractions }) => {
       if (callbacks === 0) {
         t.deepEqual([], assertions)
         t.deepEqual([], retractions)
@@ -74,7 +89,7 @@ test('multisubscribe', t => {
   return new Promise((resolve, reject) => {
     client.on('error', reject)
 
-    client.on(JSON.stringify(subscription), ({ assertions, retractions }) => {
+    client.on(subscription, ({ assertions, retractions }) => {
       if (callbacks === 0) {
         t.deepEqual([], assertions)
         t.deepEqual([], retractions)

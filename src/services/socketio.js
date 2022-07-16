@@ -7,20 +7,23 @@ import { Server } from 'socket.io'
 export default function SocketIoService ({ room, port, verbose }) {
   const io = new Server()
 
-  if (verbose) io.use(log)
-
   io.on('connection', (socket) => {
+    if (verbose) socket.use(log)
+
     socket.on('ping', (ping) => socket.emit('pong', ping + 1))
 
-    socket.on('assert', (data) => room.assert(data).flushChanges())
+    socket.on('assert', (data) => {
+      if (verbose) console.log(`asserting ${util.inspect(data)}`)
+      room.assert(data).flushChanges()
+    })
     socket.on('retract', (data) => room.retract(data).flushChanges())
     socket.on('flush', () => room.flushChanges())
 
-    socket.on('select', context => {
+    socket.on('select', (selection, cb) => {
       room
-        .select(context.data)
+        .select(selection)
         .doAll(assertions => {
-          context.data = assertions
+          cb(assertions)
         })
     })
 
@@ -38,14 +41,14 @@ export default function SocketIoService ({ room, port, verbose }) {
   })
 
   const listen = () => {
-    io.listen(port)
     nbonjour.create().publish(service)
+    return io.listen(port)
   }
 
   return { service, listen }
 }
 
-const log = async ({ event, data }, next) => {
+const log = async ([event, ...data], next) => {
   const payload = util.inspect(data) ?? ''
   console.log(`<-  ${event ?? ''} ${payload}`)
   await next()
