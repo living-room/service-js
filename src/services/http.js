@@ -25,10 +25,10 @@ const parsefacts = () => async (context, next) => {
 
 const log = () => async (context, next) => {
   const requestBody = util.inspect(context.request.body)
-  console.log(`<- ${context.url} ${requestBody}`)
+  console.log(`[htp] <- ${context.url} ${requestBody}`)
   await next()
   const responseBody = util.inspect(context.body)
-  console.log(`-> ${context.url} ${responseBody}`)
+  console.log(`[htp] -> ${context.url} ${responseBody}`)
 }
 
 export default class HttpService {

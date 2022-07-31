@@ -3,9 +3,13 @@ import util from 'util'
 import { hostname } from 'os'
 import nbonjour from 'nbonjour'
 import { Server } from 'socket.io'
+import HttpService from './http.js'
+import { createServer } from 'http'
 
 export default function SocketIoService ({ room, port, verbose }) {
-  const io = new Server()
+  const app = new HttpService({ room, port, verbose })
+  const httpServer = createServer(app.callback())
+  const io = new Server(httpServer)
 
   io.on('connection', (socket) => {
     if (verbose) socket.use(log)
@@ -42,7 +46,7 @@ export default function SocketIoService ({ room, port, verbose }) {
 
   const listen = () => {
     nbonjour.create().publish(service)
-    return io.listen(port)
+    return httpServer.listen(port)
   }
 
   return { service, listen }
@@ -50,7 +54,7 @@ export default function SocketIoService ({ room, port, verbose }) {
 
 const log = async ([event, ...data], next) => {
   const payload = util.inspect(data) ?? ''
-  console.log(`<-  ${event ?? ''} ${payload}`)
+  console.log(`[sio] <- ${event ?? ''} ${payload}`)
   await next()
-  console.log(` -> ${event ?? ''} ${payload}`)
+  console.log(`[sio] -> ${event ?? ''} ${payload}`)
 }
