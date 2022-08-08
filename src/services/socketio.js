@@ -9,7 +9,9 @@ import { createServer } from 'http'
 export default function SocketIoService ({ room, port, verbose }) {
   const app = new HttpService({ room, port, verbose })
   const httpServer = createServer(app.callback())
-  const io = new Server(httpServer)
+  const io = new Server(httpServer, {
+    cors: { origin: 'http://localhost:5000' }
+  })
 
   io.on('connection', (socket) => {
     if (verbose) socket.use(log)
