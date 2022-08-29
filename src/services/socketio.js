@@ -9,8 +9,11 @@ import { createServer } from 'http'
 export default function SocketIoService ({ room, port, verbose }) {
   const app = new HttpService({ room, port, verbose })
   const httpServer = createServer(app.callback())
+  // makes cors work for the socket.io connection
   const io = new Server(httpServer, {
-    cors: { origin: 'http://localhost:5000' }
+    cors: {
+      origin: 'http://localhost:5000'
+    }
   })
 
   io.on('connection', (socket) => {

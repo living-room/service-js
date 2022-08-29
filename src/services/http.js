@@ -4,7 +4,7 @@ import Koa from 'koa'
 import body from 'koa-body'
 import cors from '@koa/cors'
 import route from 'koa-route'
-import static_ from 'koa-static'
+import send from 'koa-send'
 import DBStream from './dbstream.js'
 import { makeService } from '../manager.js'
 import { hostname } from 'os'
@@ -38,10 +38,7 @@ export default class HttpService {
     this._services = []
     const app = new Koa()
 
-    app.use(cors({
-      origin: '*'
-    }))
-
+    app.use(cors({ origin: 'http://localhost:5000' }))
     app.use(body({ multipart: true }))
     if (options.verbose) app.use(log())
 
@@ -92,7 +89,13 @@ export default class HttpService {
       })
     )
 
-    app.use(static_('examples'))
+    app.use(async (ctx) => {
+      if (ctx.path === '/socket.io.esm.min.js') {
+        ctx.type = 'application/javascript'
+        await send(ctx, 'socket.io.esm.min.js')
+      }
+    })
+
     this.app = app
     return this.app
   }
