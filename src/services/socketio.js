@@ -21,11 +21,16 @@ export default function SocketIoService ({ room, port, verbose }) {
 
     socket.on('ping', (ping) => socket.emit('pong', ping + 1))
 
-    socket.on('assert', (data) => {
+    socket.on('assert', (data, acknowledgement) => {
       if (verbose) console.log(`asserting ${util.inspect(data)}`)
       room.assert(data).flushChanges()
+      acknowledgement?.(data)
     })
-    socket.on('retract', (data) => room.retract(data).flushChanges())
+    socket.on('retract', (data, acknowledgement) => {
+      if (verbose) console.log(`retracting ${util.inspect(data)}`)
+      room.retract(data).flushChanges()
+      acknowledgement?.(data)
+    })
     socket.on('flush', () => room.flushChanges())
 
     socket.on('select', (selection, cb) => {
